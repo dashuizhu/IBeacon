@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.DeviceDetailActivity">
+
+    <TextView
+        android:id="@+id/tv_device"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/layout_selector"
+        android:onClick="getStatus"
+        android:padding="@dimen/activity_horizontal_margin" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setName"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_name" />
+
+    <TextView
+        android:id="@+id/tv_minor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setMinor"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_minor" />
+
+    <TextView
+        android:id="@+id/tv_major"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setMajor"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_major" />
+
+    <TextView
+        android:id="@+id/tv_uuid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setUUID"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_uuid" />
+
+    <TextView
+        android:id="@+id/tv_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setFrequency"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_rate" />
+
+    <TextView
+        android:id="@+id/tv_cmd_restart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setCmdRestart"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_cmd_restart" />
+
+    <TextView
+        android:id="@+id/tv_cmd_deploy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_selector"
+        android:onClick="setCmdDeploy"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="@string/label_set_cmd_deploy" />
+
+</LinearLayout>

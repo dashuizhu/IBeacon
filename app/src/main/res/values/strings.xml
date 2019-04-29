@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">IBeacon</string>
+    <string name="label_set_name">设置名字</string>
+    <string name="label_set_major">设置major</string>
+    <string name="label_set_uuid">设置uuid</string>
+    <string name="label_set_rate">设置广播频率</string>
+    <string name="label_set_cmd_restart">重启</string>
+    <string name="label_set_cmd_deploy">部署</string>
+    <string name="label_set_minor">设置minor</string>
+    <string name="toast_lostLink">断开连接</string>
+    <string name="toast_linking">正在连接中....</string>
+</resources>
