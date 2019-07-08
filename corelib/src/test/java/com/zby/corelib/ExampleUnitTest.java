@@ -9,9 +9,17 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
- class ExampleUnitTest {
+ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
+
+
+        byte[] b = "试试".getBytes();
+        String str = MyHexUtils.buffer2String(b);
+        System.out.println(str);
+
+        byte[] bb = MyHexUtils.hexStringToByte(str);
+        System.out.println(new String(bb));
 
         System.out.println(LogUtils.isLog(0));
         System.out.println(LogUtils.isLog(1));

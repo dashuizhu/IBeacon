@@ -140,7 +140,7 @@ public class DeviceListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        BleManager.getInstance().destroy();
+        //BleManager.getInstance().destroy();
         super.onDestroy();
     }
 }
