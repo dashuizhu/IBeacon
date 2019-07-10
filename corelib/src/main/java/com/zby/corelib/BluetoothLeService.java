@@ -64,14 +64,14 @@ public class BluetoothLeService extends Service {
     //public static final int STATE_CONNECTED    = 2;
 
     private static final UUID SEND_SERVIE_UUID         =
-            UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ff50-0000-1000-8000-00805f9b34fb");
     private static final UUID SEND_CHARACTERISTIC_UUID =
-            UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ff52-0000-1000-8000-00805f9b34fb");
 
     private static final UUID RECEIVER_SERVICE        =
-            UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ff50-0000-1000-8000-00805f9b34fb");
     private static final UUID RECEIVER_CHARACTERISTIC =
-            UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ff51-0000-1000-8000-00805f9b34fb");
 
     // Implements callback methods for GATT events that the app cares about. For
     // example,
@@ -96,8 +96,7 @@ public class BluetoothLeService extends Service {
                         // if(!isReconnect) {
                         intentAction = ConnectAction.ACTION_GATT_DISCONNECTED;
                         Log.i(TAG, "Disconnected from GATT server.");
-                        removeGatt(gattMapsConnting, address);
-                        removeGatt(gattMaps, address);
+                        disconnect((address));
                         broadcastUpdate(intentAction, address);
                         // } else {
                         // intentAction = ACTION_GATT_RECONNECTING;
@@ -112,6 +111,7 @@ public class BluetoothLeService extends Service {
 
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                    Log.w(TAG, "onServicesDiscovered received: " + status + " " + gatt.getServices().size());
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         String address = gatt.getDevice().getAddress();
                         broadcastUpdate(ConnectAction.ACTION_GATT_SERVICES_DISCOVERED, address);
@@ -480,7 +480,11 @@ public class BluetoothLeService extends Service {
             }
             int storedLevel = alertLevel.getWriteType();
             Log.d(TAG, "storedLevel() - storedLevel=" + storedLevel);
-            alertLevel.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+            if (bb.length>20) {
+                alertLevel.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+            } else {
+                alertLevel.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+            }
         }
 
         // enableBattNoti(iDevice);

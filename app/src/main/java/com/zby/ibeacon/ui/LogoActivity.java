@@ -12,6 +12,7 @@ public class LogoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logo);
 
+
         startActivity(new Intent(this, DeviceListActivity.class));
         finish();
     }

@@ -26,7 +26,7 @@ interface IConnectInterface {
 	 * 将命令生成协议后发送
 	 * @param buffer
 	 */
-	boolean writeAgreement(byte[] buffer);
+	boolean writeAgreement(byte[] buffer, String encryptKey);
 	/**
 	 * 读取数据，数据
 	 * @param buffer

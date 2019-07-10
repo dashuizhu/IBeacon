@@ -14,6 +14,7 @@
         android:onClick="getStatus"
         android:padding="@dimen/activity_horizontal_margin" />
 
+
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="match_parent"
@@ -21,7 +22,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setName"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_name" />
+        android:text="识别命令" />
 
     <TextView
         android:id="@+id/tv_minor"
@@ -30,7 +31,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setMinor"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_minor" />
+        android:text="开锁" />
 
     <TextView
         android:id="@+id/tv_major"
@@ -39,7 +40,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setMajor"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_major" />
+        android:text="转换密钥模式" />
 
     <TextView
         android:id="@+id/tv_uuid"
@@ -48,33 +49,10 @@
         android:background="@drawable/layout_selector"
         android:onClick="setUUID"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_uuid" />
+        android:text="设置Key" />
 
-    <TextView
-        android:id="@+id/tv_rate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_selector"
-        android:onClick="setFrequency"
-        android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_rate" />
 
-    <TextView
-        android:id="@+id/tv_cmd_restart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_selector"
-        android:onClick="setCmdRestart"
-        android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_cmd_restart" />
 
-    <TextView
-        android:id="@+id/tv_cmd_deploy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_selector"
-        android:onClick="setCmdDeploy"
-        android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_cmd_deploy" />
+
 
 </LinearLayout>

@@ -1,5 +1,7 @@
 package com.zby.corelib;
 
+import android.text.TextUtils;
+
 /**
  * DeviceBean
  */
@@ -7,15 +9,16 @@ public class DeviceBean {
 
     String  mac;
     String  name;
-    String  uuid;
-    int     broadcastFrequency;
-    int     major;
-    int     minor;
-    int     electricity;
-    int     rssi;
+    int     voltage;
     int     power;
+    int     rssi;
     boolean onOff;
+    int     duration;
     boolean isBonded;
+
+    String key;
+
+    String cacheKey;
 
     DeviceBean() {
 
@@ -35,102 +38,79 @@ public class DeviceBean {
         return name;
     }
 
-    /**
-     * @return BroadcastFrequency 0-65525
-     */
-    public int getBroadcastFrequency() {
-        return broadcastFrequency;
+    public boolean isOnOff() {
+        return onOff;
     }
 
     /**
-     * @return uuid
+     * @return device voltage type
      */
-    public String getUuid() {
-        return uuid;
+    public int getVoltageType() {
+        return voltage;
     }
 
     /**
-     * @return major
+     * @return AES128 encrypt key
      */
-    public int getMajor() {
-        return major;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * @return minor
+     * Send unlock command
+     * @return ture is sent successfully
      */
-    public int getMinor() {
-        return minor;
+    public boolean sendUnlock() {
+        String macStr = mac.replace(":", "");
+        return BleManager.getInstance().mInterface.writeAgreement(
+                CmdPackage.setOpen(macStr, duration), key);
     }
 
     /**
-     * @return rssi
+     * send read statis command
+     * @return  ture is sent successfully
      */
-    public int getRssi() {
-        return rssi;
+    public boolean sendReadStatus() {
+        return BleManager.getInstance().mInterface.writeAgreement(CmdPackage.getStatus(), key);
     }
 
     /**
-     * set name, chart-set "utf-8", name.byte() max length is 17
+     * Send command, modify the key as {@link BleManager#DEFAULT_KEY} after receiving the reply successfully.
+     * @return ture is sent successfully
      */
-    public void setName(String name) {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setName(name));
+    public boolean sendChangeMode() {
+        boolean result =
+                BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setChangeMode(), key);
+        return result;
     }
 
     /**
-     * set BroadcastFrequency
-     *
-     * @param frequency 0-65525
+     * Send command, modify the key as newKey after receiving the reply successfully.
+     * @param newKey  AES128 key, The key must be 16 bytes long  decoding by UTF-8
+     * @return ture is sent successfully
      */
-    public void setBroadcastFrequency(int frequency) {
-        BleManager.getInstance().mInterface.writeAgreement(
-                CmdPackage.setBroadcastFrequency(frequency));
+    public boolean sendSetKey(String newKey) {
+        if (TextUtils.isEmpty(newKey)) {
+            throw new IllegalArgumentException("The key must be 16 bytes long");
+        }
+        if (newKey.getBytes().length != 16) {
+            throw new IllegalArgumentException("The key must be 16 bytes long");
+        }
+        boolean result =
+                BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setKey(newKey), key);
+        this.cacheKey = newKey;
+        return result;
     }
 
     /**
-     * set uuid, 16Byte
+     * AEK128 KEY， if input the key null , it will cancel AES128 encryption
+     * @param key AES128 key， The key must be 16 bytes long  decoding by UTF-8
      */
-    public void setUUID(String uuid) {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setUUID(uuid.toUpperCase()));
+    public void setKey(String key) {
+        if (!TextUtils.isEmpty(key) && key.getBytes().length != 16) {
+            throw new IllegalArgumentException("The key must be null or 16 bytes long");
+        }
+        this.key = key;
     }
 
-    /**
-     * set major
-     *
-     * @param major 0-65525
-     */
-    public void setMajor(int major) {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setMajor(major));
-    }
-
-    /**
-     * set minor
-     *
-     * @param minor 0-65525
-     */
-    public void setMinor(int minor) {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setMinor(minor));
-    }
-
-    /**
-     * read status 、name、uuid，
-     * when data update callback by {@link BleManager.OnDeviceUpdateListener#onDataUpdate(DeviceBean)}
-     */
-    public void readStatus() {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.readStatus());
-    }
-
-    /**
-     * restart mode
-     */
-    public void setModeRestart() {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setCmd(1, 1));
-    }
-
-    /**
-     * deploy mode
-     */
-    public void setModeDeploy() {
-        BleManager.getInstance().mInterface.writeAgreement(CmdPackage.setCmd(1, 0));
-    }
 }

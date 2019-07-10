@@ -7,7 +7,7 @@ import android.util.Log;
  */
  class LogUtils {
     static final String pre = "ble_";
-    static final int logLevel = 31;
+    static final int logLevel = 63;
 
     public static boolean isLog(int level) {
         return ((logLevel >>level) & 1) == 1;

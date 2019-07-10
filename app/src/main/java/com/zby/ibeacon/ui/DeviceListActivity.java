@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -50,7 +51,7 @@ public class DeviceListActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-
+        //BleManager.getInstance().setEncryptKey("1234567890123456");
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
@@ -103,6 +104,9 @@ public class DeviceListActivity extends AppCompatActivity {
                 AppApplication.sDeviceBean = db;
                 startActivity(new Intent(DeviceListActivity.this, DeviceDetailActivity.class));
                 //db.getStatus();
+                db.setKey(BleManager.DEFAULT_KEY);
+                db.sendReadStatus();
+                //db.sendSetLockOpen();
             }
 
             @Override

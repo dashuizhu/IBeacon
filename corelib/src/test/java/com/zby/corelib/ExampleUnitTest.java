@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
- public class ExampleUnitTest {
+class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
 
@@ -28,9 +28,11 @@ import static org.junit.Assert.*;
         System.out.println(LogUtils.isLog(4));
         System.out.println(LogUtils.isLog(5));
 
-        int a = 11 >>3;
+        byte b2 = (byte)0x81;
+
+        int a = 31 >> 4;
         int value = a & 1;
-        System.out.println( a + "  " + value );
+        System.out.println( a + "  " + value + b2 );
 
         assertEquals(4, 2 + 2);
     }
@@ -38,9 +40,9 @@ import static org.junit.Assert.*;
     @Test
     public void parseDataTest() {
 
-        String s1  = "0D BB 6E 61 6D 65 E4 BD A0 E5 A5 BD 36 00 00 00 00 00 00 83";
-        String s2= "12 BC 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 04 00 AA";
-        String s3 = "0B BA 01 F4 00 0A 00 07 00 00 00 64 00 BB FE FF FF 0E 36 50";
+        String s1  = "0D FF 05 B1 6D EF E4 BD A0 E5 A5 BD 36 00 00 00 00 00 00 83";
+        String s2= "12 FF 08 B5 03 01 01 ";
+        String s3 = "01 EF 00 AA F4 00 0A 00 07 00 00 00 64 00 BB FE FF FF 0E 36 50";
 
         CmdProcess cmdProcess = new CmdProcess(null);
 
@@ -52,39 +54,54 @@ import static org.junit.Assert.*;
 
         buff = MyHexUtils.hexStringToByte(s3);
         cmdProcess.processDataCommand(null, buff, buff.length);
-        //
-        System.out.println(0x83+" " +( (0x0D)^0xBB^0x6e^0x61));
-        ////System.out.println(0x06+" " +( (0x08)^0xA1^0x05^0x06));
-        ////System.out.println(0x5+" " +( (0x04)^0xA2^0x01^0xF4));
-        ////System.out.println(0x5+" " +( (0x04)^0xA2^0x00^0x00));
-        ////
-        //System.out.println(0xF8+" " +( (0x03)^0xB1^0x00^0x0E));
-        ////System.out.println(0xB1+" " +( (0x03)^0xB2^0x00^0x00));
-        //
-        //
-        //
-        //byte[] b1= new byte[5];
-        //b1[0] = (byte) 0x03;
-        //b1[1] = (byte) 0xB1;
-        //byte[] b2= new byte[15];
-        //b2[14] = (byte) 0xB2;
-        //
-        //byte[] b5 = new byte[3];
-        //
-        //byte[] b3= new byte[2];
-        //b3[0] = (byte) 0x03;
-        //b3[1] = (byte) 0xB4;
-        //byte[] b4= new byte[18];
-        //b4[17] = (byte) 0xB7;
-        //
-        //
-        //cmdProcess.processDataCommand(null, b1, b1.length);
-        //cmdProcess.processDataCommand(null, b2, b2.length);
-        //cmdProcess.processDataCommand(null, b5, b5.length);
-        //cmdProcess.processDataCommand(null, b3, b3.length);
-        //cmdProcess.processDataCommand(null, b4, b4.length);
+
+    }
+
+    @Test
+    public void sendTest() {
 
 
+
+        String key = "1111111111111111";
+
+        byte[] b1 = CmdEncrypt.sendMessage(CmdPackage.setKey("1234567890123456"));
+        //System.out.println(MyHexUtils.buffer2String(b1));
+
+        //b1 = CmdEncrypt.sendMessage(CmdPackage.setOpen("010203040506", 0));
+        String s1 = MyHexUtils.buffer2String(b1);
+        System.out.println(s1);
+
+        b1  = AESCBCUtil.encrypt(b1, key);
+        System.out.println(MyHexUtils.buffer2String(b1));
+
+        byte[] deB = AESCBCUtil.decrypt(b1, key);
+        System.out.println("解密 "+MyHexUtils.buffer2String(deB));
+
+
+        String deStr = "38 AF 98 01 60 EF 9E 27 7B D0 A7 43 38 92 A9 6E ";
+        b1 = AESCBCUtil.decrypt(MyHexUtils.hexStringToByte(deStr), key);
+        System.out.println("解密 "+MyHexUtils.buffer2String(b1));
+
+        deStr = "94 00 6E 20 2F A6 3B A8 F0 B5 A8 9E 6D 4C 2F A3 ";
+        b1 = AESCBCUtil.decrypt(MyHexUtils.hexStringToByte(deStr), key);
+        System.out.println("解密 "+MyHexUtils.buffer2String(b1));
+
+
+    }
+
+    @Test
+    public void add16() {
+        String hello="生成秘钥生。";
+        int len=hello.getBytes().length;
+        if(len%8!=0){
+                System.out.println("不是8的整数倍");
+                byte[] hellotemp=new byte[len+(8-len%8)];
+                for(int i=0;i<len;i++){
+                    hellotemp[i]=hello.getBytes()[i];
+                }
+                hello=new String(hellotemp);
+            }
+        System.out.println(hello.getBytes().length);
     }
 
 }

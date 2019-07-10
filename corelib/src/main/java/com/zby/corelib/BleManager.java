@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,6 +46,11 @@ public class BleManager {
     private Thread      scanThread;
     private Set<String> mMacSet = new HashSet<>();
 
+    /**
+     * default AES128 KEY
+     */
+    public final static String DEFAULT_KEY = "1111111111111111";
+
     private BleManager() {
     }
 
@@ -71,7 +77,6 @@ public class BleManager {
 
     /**
      * get BlemManager
-     * @return
      */
     public static BleManager getInstance() {
         if (mBleManager == null) {
@@ -196,11 +201,18 @@ public class BleManager {
 
         @Override
         public void onLeScan(BluetoothDevice arg0, int arg1, byte[] arg2) {
+            Log.d(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
+            if (TextUtils.isEmpty(arg0.getName()) || !arg0.getName()
+                    .toLowerCase()
+                    .startsWith("un")) {
+                return;
+            }
             // TODO Auto-generated method stub
             //if (!mMacSet.contains(arg0.getAddress())) {//避免一次搜索， 同一个设备多次回调
-            Log.d(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
+            int ele = MyByteUtils.byteToInt(arg2[15]);
+            int onoff = MyByteUtils.byteToInt(arg2[17]);
             //mMacSet.add(arg0.getAddress());
-            foundDevice(arg0, arg1);
+            foundDevice(arg0, arg1, ele, onoff == 1);
             //}
         }
     };
@@ -209,11 +221,13 @@ public class BleManager {
      * @param device
      * @param arg1
      */
-    private void foundDevice(BluetoothDevice device, int arg1) {
+    private void foundDevice(BluetoothDevice device, int arg1, int ele, boolean onfoo) {
         for (DeviceBean db : mDeviceList) {
             if (db.getMac() == device.getAddress()) {
                 db.name = device.getName();
                 db.rssi = arg1;
+                db.voltage = ele;
+                db.onOff = onfoo;
                 db.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
                 if (mDeviceListener != null) {
                     mDeviceListener.onDeviceFound(db);
@@ -225,6 +239,8 @@ public class BleManager {
         bean.name = device.getName();
         bean.mac = device.getAddress();
         bean.rssi = arg1;
+        bean.voltage = ele;
+        bean.onOff = onfoo;
         bean.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
         mDeviceList.add(bean);
         if (mDeviceList != null) {
@@ -256,20 +272,23 @@ public class BleManager {
             final String mac = intent.getStringExtra(ConnectAction.BROADCAST_DEVICE_MAC);
             if (ConnectAction.ACTION_GATT_CONNECTED.equals(action)) {
                 //连接设备
+                //mCmdProcess.cleanCache();
             } else if (ConnectAction.ACTION_GATT_DISCONNECTED.equals(action)) {
                 //断开连接
                 if (mDeviceListener != null) {
                     mDeviceListener.onLostLink(mDb);
                 }
             } else if (ConnectAction.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                Log.e("ble_test", " 发现服务 " + isConnected(mDb));
                 //发现服务
                 if (mDeviceListener != null) {
                     mDeviceListener.onLinked(mDb);
                 }
             } else if (ConnectAction.ACTION_RECEIVER_DATA.equals(action)) { //解析数据
                 byte[] buffer = intent.getByteArrayExtra(ConnectAction.BROADCAST_DATA_value);
-                LogUtils.logV("bleManager", mac + "接受数据:" + MyHexUtils.buffer2String(buffer));
+                LogUtils.logV("bleManager", "接受数据:" + MyHexUtils.buffer2String(buffer));
                 if (mDb != null) {
+                    mCmdProcess.cleanCache();
                     mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
                     if (mDeviceUpdateListener != null) {
                         mDeviceUpdateListener.onDataUpdate(mDb);
@@ -329,7 +348,6 @@ public class BleManager {
     public interface OnScanDeviceListener {
         /**
          * device found
-         * @param db
          */
         void onDeviceFound(DeviceBean db);
 
@@ -340,13 +358,11 @@ public class BleManager {
 
         /**
          * link success
-         * @param db
          */
         void onLinked(DeviceBean db);
 
         /**
          * when the link lost
-         * @param db
          */
         void onLostLink(DeviceBean db);
     }

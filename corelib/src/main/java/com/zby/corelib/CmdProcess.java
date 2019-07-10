@@ -1,5 +1,6 @@
 package com.zby.corelib;
 
+import android.text.TextUtils;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,9 @@ import java.util.Set;
 class CmdProcess {
 
     private final static String TAG = "cmdProcess";
+
+    private final static int CMD_HEAD = (byte) 0xFF;
+    private final static int CMD_END  = (byte) 0xEF;
 
     private ICmdParseInterface mCmdParse;
 
@@ -30,23 +34,15 @@ class CmdProcess {
      */
     private byte[] data_command = new byte[512];
 
-    private Set<Byte> mCmdSet = new HashSet() {
-        {
-            add(CmdParseImpl.type_password);
-            add(CmdParseImpl.type_frequency);
-            add(CmdParseImpl.type_major);
-            add(CmdParseImpl.type_minor);
-            add(CmdParseImpl.type_uuid_set);
-            add(CmdParseImpl.type_password_set);
-            add(CmdParseImpl.type_name);
-            add(CmdParseImpl.type_rate);
-            add(CmdParseImpl.type_light);
-            add(CmdParseImpl.type_status);
-            add(CmdParseImpl.type_name_read);
-            add(CmdParseImpl.type_uuid_red);
-            add(CmdParseImpl.type_cmd);
-        }
-    };
+    //private Set<Byte> mCmdSet = new HashSet() {
+    //    {
+    //        add(CmdParseImpl.TYPE_CHANGEMODE);
+    //        add(CmdParseImpl.TYPE_CHECKID);
+    //        add(CmdParseImpl.TYPE_OPEN);
+    //        add(CmdParseImpl.TYPE_SETKEY);
+    //        add(CmdParseImpl.TYPE_STATUS);
+    //    }
+    //};
 
     /**
      * 将收到的数据 截取符合协议的子集
@@ -70,44 +66,77 @@ class CmdProcess {
             //最短协议都有5个字节
             return;
         }
+
+        //AES加密模式
+        String key = db.getKey();
+        if (!TextUtils.isEmpty(key)) {
+            //凑够16个字节，进行解密
+            if (data_length % 16 == 0) {
+                byte[] buff = new byte[data_length];
+                System.arraycopy(data_command, 0, buff, 0, buff.length);
+
+                byte[] decrBuff = AESCBCUtil.decrypt(buff, key);
+                int endIndex = 0;
+                for (int i = decrBuff.length - 1; i >= 0; i--) {
+                    if (decrBuff[i] != 0) {
+                        endIndex = i;
+                        break;
+                    }
+                }
+                byte[] checkBuff = new byte[endIndex];
+                System.arraycopy(decrBuff, 0, checkBuff, 0, checkBuff.length);
+                byte[] encryBuff = CmdEncrypt.processMessage(checkBuff);
+                if (encryBuff != null) {
+                    //解析成功，
+                    parseData(db, encryBuff);
+                    cleanCache();
+                    return;
+                }
+            }
+        }
+
+        //非加密模式
         for (int index = 0; index < data_length; index++) {
+
             //判断是否含有指定的返回识别码
-            if (mCmdSet.contains(data_command[index])) {
-                if (index > 0) {
-                    //长度判断
-                    //数据长度写在了  识别码前面，所以下标-1，
-                    //int checkBuffLenght = MyByteUtils.byteToInt(data_command[index - 1]);
-                    int checkBuffLenght = 20;
-                    //剩余的数据，长度超过一条协议， 每一条协议都是20个字节
-                    if (index + 19 <= data_length) {
-                        //需要检测的数据组， +1是长度字节本身自己。
-                        byte[] checkBuff = new byte[checkBuffLenght];
-                        System.arraycopy(data_command, index - 1, checkBuff, 0, checkBuff.length);
-                        //检测完毕的数据
-                        byte[] encryBuff = CmdEncrypt.processMessage(checkBuff);
-                        if (encryBuff != null) {
-                            //解析成功，
-                            parseData(db, encryBuff);
-                            //把剩下数据提取出来 ，重新组成缓存区
-                            int dataIndex = index + checkBuffLenght;
-                            if (dataIndex < data_length) {
-                                byte[] othenBuff = new byte[data_length - dataIndex];
-                                System.arraycopy(data_command, dataIndex, othenBuff, 0,
-                                        othenBuff.length);
-                                data_command = new byte[512];
-                                data_length = 0;
-                                processDataCommand(db, othenBuff, othenBuff.length);
-                                return;
-                            } else { //正好解析完，缓存区所有数据
-                                data_command = new byte[512];
-                                data_length = 0;
-                                return;
-                            }
+            if (data_command[index] == CMD_HEAD) {
+                if (index + 1 >= data_length) {
+                    break;
+                }
+                int length = data_command[index + 1];
+                //是否是 包尾
+                if (data_command[index + length - 1] == CMD_END) {
+
+                    byte[] checkBuff = new byte[length];
+                    System.arraycopy(data_command, index, checkBuff, 0, checkBuff.length);
+                    //检测完毕的数据
+                    byte[] encryBuff = CmdEncrypt.processMessage(checkBuff);
+                    if (encryBuff != null) {
+                        //解析成功，
+                        parseData(db, encryBuff);
+                        //把剩下数据提取出来 ，重新组成缓存区
+                        int dataIndex = index + length;
+                        if (dataIndex < data_length) {
+                            byte[] othenBuff = new byte[data_length - dataIndex];
+                            System.arraycopy(data_command, dataIndex, othenBuff, 0,
+                                    othenBuff.length);
+                            data_command = new byte[512];
+                            data_length = 0;
+                            processDataCommand(db, othenBuff, othenBuff.length);
+                            return;
+                        } else { //正好解析完，缓存区所有数据
+                            cleanCache();
+                            return;
                         }
                     }
                 }
             }
         }
+    }
+
+    protected void cleanCache() {
+        data_command = new byte[512];
+        data_length = 0;
     }
 
     private void parseData(DeviceBean db, byte[] buffer) {

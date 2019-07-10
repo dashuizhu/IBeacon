@@ -1,5 +1,6 @@
 package com.zby.corelib;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 class BleImpl implements IConnectInterface {
@@ -39,12 +40,22 @@ class BleImpl implements IConnectInterface {
         if (buffer == null) {
             return false;
         }
+
         return mService.writeLlsAlertLevel(mDeviceAddress, buffer);
     }
 
     @Override
-    public boolean writeAgreement(byte[] buffer) {
-        return write(CmdEncrypt.sendMessage(buffer));
+    public boolean writeAgreement(byte[] buffer, String encryptKey) {
+        //需要对数据进行abs 128加密
+        buffer = CmdEncrypt.sendMessage(buffer);
+        if (!TextUtils.isEmpty(encryptKey)) {
+            //除了识别命令，其他命令需要 加密
+            if (buffer[2] != CmdPackage.TYPE_CHECK) {
+                buffer = AESCBCUtil.encrypt(buffer, encryptKey);
+                LogUtils.logD("bleimpl", " aes key："+encryptKey +" 加密内容："+MyHexUtils.buffer2String(buffer));
+            }
+        }
+        return write(buffer);
     }
 
     @Override

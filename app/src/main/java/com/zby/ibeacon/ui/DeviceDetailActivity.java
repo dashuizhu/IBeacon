@@ -34,50 +34,38 @@ public class DeviceDetailActivity extends AppCompatActivity {
     }
 
     private String getDevcieJson() {
+        if (db == null) {
+            return null;
+        }
         return db.getName()
                 + " mac:"
                 + db.getMac()
-                + "\n major:"
-                + db.getMajor()
-                + "  minor:"
-                + db.getMinor()
-                + " broadcastFrequency:"
-                + db.getBroadcastFrequency()
-                + "\n uuid: "
-                + db.getUuid();
+                + " 开关："+db.isOnOff()
+                + " ele:" + db.getVoltageType()
+                + " key:" + db.getKey();
     }
 
     public void getStatus(View view) {
-        db.readStatus();
+        db.sendReadStatus();
     }
 
     public void setName(View view) {
-        db.setName("name你好" + mRandom.nextInt(10));
+        //db.sendCheckId();
     }
 
     public void setMinor(View view) {
-        db.setMinor(mRandom.nextInt(10000));
+        db.sendUnlock();
     }
 
     public void setMajor(View view) {
-        db.setMajor(mRandom.nextInt(10000));
-    }
-
-    public void setFrequency(View view) {
-        db.setBroadcastFrequency(mRandom.nextInt(10000));
+        db.sendChangeMode();
     }
 
     public void setUUID(View view) {
-        db.setUUID("0102030405060708090A0B0C0D0E0F0" + mRandom.nextInt(9));
+        db.sendSetKey("1234567890111111");
     }
 
-    public void setCmdRestart(View view) {
-        db.setModeRestart();
-    }
 
-    public void setCmdDeploy(View view) {
-        db.setModeDeploy();
-    }
 
     @Override
     protected void onDestroy() {
