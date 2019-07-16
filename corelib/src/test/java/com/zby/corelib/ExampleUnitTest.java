@@ -9,14 +9,15 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-class ExampleUnitTest {
+public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
 
+        float ff = Math.round(740 * (256 * 7 + 128) / 2047) / 100.0f;
 
         byte[] b = "试试".getBytes();
         String str = MyHexUtils.buffer2String(b);
-        System.out.println(str);
+        System.out.println(str + " " + ff);
 
         byte[] bb = MyHexUtils.hexStringToByte(str);
         System.out.println(new String(bb));

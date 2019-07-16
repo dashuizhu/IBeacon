@@ -41,7 +41,8 @@ public class DeviceDetailActivity extends AppCompatActivity {
                 + " mac:"
                 + db.getMac()
                 + " 开关："+db.isOnOff()
-                + " ele:" + db.getVoltageType()
+                + " ele:" + db.getElectricity()
+                + " voltage:" + db.getVoltage()
                 + " key:" + db.getKey();
     }
 

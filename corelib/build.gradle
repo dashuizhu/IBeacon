@@ -27,7 +27,7 @@ task exportJar(type: Copy) {
   from('build/outputs/aar/')
   into('build/libs/')
   include('corelib-release.aar')
-  rename ('corelib-release.aar', 'zbyble.aar')
+  rename ('corelib-release.aar', "zbyble_lock_v"+ android.defaultConfig.versionName +".aar")
 }
 
 dependencies {

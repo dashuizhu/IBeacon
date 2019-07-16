@@ -104,7 +104,7 @@ public class DeviceListActivity extends AppCompatActivity {
                 AppApplication.sDeviceBean = db;
                 startActivity(new Intent(DeviceListActivity.this, DeviceDetailActivity.class));
                 //db.getStatus();
-                db.setKey(BleManager.DEFAULT_KEY);
+                //db.setKey(BleManager.DEFAULT_KEY);
                 db.sendReadStatus();
                 //db.sendSetLockOpen();
             }

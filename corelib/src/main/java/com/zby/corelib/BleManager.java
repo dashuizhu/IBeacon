@@ -226,7 +226,7 @@ public class BleManager {
             if (db.getMac() == device.getAddress()) {
                 db.name = device.getName();
                 db.rssi = arg1;
-                db.voltage = ele;
+                db.eleType = ele;
                 db.onOff = onfoo;
                 db.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
                 if (mDeviceListener != null) {
@@ -239,7 +239,7 @@ public class BleManager {
         bean.name = device.getName();
         bean.mac = device.getAddress();
         bean.rssi = arg1;
-        bean.voltage = ele;
+        bean.eleType = ele;
         bean.onOff = onfoo;
         bean.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
         mDeviceList.add(bean);

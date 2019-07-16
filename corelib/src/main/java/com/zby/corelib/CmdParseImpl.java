@@ -47,7 +47,10 @@ class CmdParseImpl implements ICmdParseInterface {
 
                 int h = MyByteUtils.byteToInt(dataBuff[1]);
                 int l = MyByteUtils.byteToInt(dataBuff[2]);
-                int low = MyByteUtils.byteToInt(dataBuff[3]);
+                //int low = MyByteUtils.byteToInt(dataBuff[3]);
+
+                float vot =  Math.round(740 * (256 * 7 + 128) / 2047) / 100.0f;
+                db.voltage = vot;
                 db.onOff = MyByteUtils.byteToInt(dataBuff[4]) == 1;
 
                 break;

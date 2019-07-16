@@ -9,8 +9,8 @@ public class DeviceBean {
 
     String  mac;
     String  name;
-    int     voltage;
-    int     power;
+    float   voltage;
+    int     eleType;
     int     rssi;
     boolean onOff;
     int     duration;
@@ -21,7 +21,6 @@ public class DeviceBean {
     String cacheKey;
 
     DeviceBean() {
-
     }
 
     /**
@@ -43,10 +42,33 @@ public class DeviceBean {
     }
 
     /**
-     * @return device voltage type
+     * @return device voltage
      */
-    public int getVoltageType() {
+    public float getVoltage() {
         return voltage;
+    }
+
+    /**
+     *
+     * @return electricity  100% 70% 30% 0%
+     */
+    public int getElectricity() {
+        int ele =0;
+        switch (eleType) {
+            case 3:
+                ele = 100;
+                break;
+            case 2:
+                ele = 70;
+                break;
+            case 1:
+                ele = 30;
+                break;
+            default:
+                ele = 0;
+                break;
+        }
+        return ele;
     }
 
     /**
