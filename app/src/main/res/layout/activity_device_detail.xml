@@ -11,25 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="@drawable/layout_selector"
-        android:onClick="getStatus"
+        android:onClick="readStatus"
         android:padding="@dimen/activity_horizontal_margin" />
 
 
-    <TextView
-        android:id="@+id/tv_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_selector"
-        android:onClick="setName"
-        android:padding="@dimen/activity_horizontal_margin"
-        android:text="识别命令" />
+    <!--<TextView-->
+        <!--android:id="@+id/tv_name"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@drawable/layout_selector"-->
+        <!--android:onClick="setName"-->
+        <!--android:padding="@dimen/activity_horizontal_margin"-->
+        <!--android:text="识别命令" />-->
 
     <TextView
         android:id="@+id/tv_minor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/layout_selector"
-        android:onClick="setMinor"
+        android:onClick="setUnlock"
         android:padding="@dimen/activity_horizontal_margin"
         android:text="开锁" />
 
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/layout_selector"
-        android:onClick="setMajor"
+        android:onClick="setChangeMode"
         android:padding="@dimen/activity_horizontal_margin"
         android:text="转换密钥模式" />
 
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/layout_selector"
-        android:onClick="setUUID"
+        android:onClick="setKey"
         android:padding="@dimen/activity_horizontal_margin"
         android:text="设置Key" />
 

@@ -111,11 +111,28 @@ public class BluetoothLeService extends Service {
 
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                    //List<BluetoothGattService> lists = gatt.getServices();
                     Log.w(TAG, "onServicesDiscovered received: " + status + " " + gatt.getServices().size());
+                    //for (BluetoothGattService ser : lists) {
+                    //    Log.w(TAG, " service: " + ser.getUuid().toString());
+                    //}
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        String address = gatt.getDevice().getAddress();
-                        broadcastUpdate(ConnectAction.ACTION_GATT_SERVICES_DISCOVERED, address);
                         setReceiver(gatt);
+                        final String address = gatt.getDevice().getAddress();
+                        //发现刚连上的一会儿 数据会发送失败，这里做一个延迟
+                        Thread thread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                broadcastUpdate(ConnectAction.ACTION_GATT_SERVICES_DISCOVERED, address);
+                            }
+                        });
+                        thread.start();
+
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }

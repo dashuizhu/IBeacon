@@ -8,14 +8,11 @@ import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
-import java.util.Random;
 
 public class DeviceDetailActivity extends AppCompatActivity {
 
     private DeviceBean db;
     private TextView   mTvDevice;
-
-    private Random mRandom = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +21,6 @@ public class DeviceDetailActivity extends AppCompatActivity {
         db = AppApplication.sDeviceBean;
         mTvDevice = findViewById(R.id.tv_device);
         mTvDevice.setText(getDevcieJson());
-
         BleManager.getInstance().addOnDeviceUpdateListener(new BleManager.OnDeviceUpdateListener() {
             @Override
             public void onDataUpdate(DeviceBean db) {
@@ -40,33 +36,27 @@ public class DeviceDetailActivity extends AppCompatActivity {
         return db.getName()
                 + " mac:"
                 + db.getMac()
-                + " 开关："+db.isOnOff()
+                + " switch："+db.isOnOff()
                 + " ele:" + db.getElectricity()
                 + " voltage:" + db.getVoltage()
                 + " key:" + db.getKey();
     }
 
-    public void getStatus(View view) {
+    public void readStatus(View view) {
         db.sendReadStatus();
     }
 
-    public void setName(View view) {
-        //db.sendCheckId();
-    }
-
-    public void setMinor(View view) {
+    public void setUnlock(View view) {
         db.sendUnlock();
     }
 
-    public void setMajor(View view) {
+    public void setChangeMode(View view) {
         db.sendChangeMode();
     }
 
-    public void setUUID(View view) {
+    public void setKey(View view) {
         db.sendSetKey("1234567890111111");
     }
-
-
 
     @Override
     protected void onDestroy() {

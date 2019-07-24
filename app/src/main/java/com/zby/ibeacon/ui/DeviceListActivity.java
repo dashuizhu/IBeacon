@@ -1,12 +1,12 @@
 package com.zby.ibeacon.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -16,7 +16,9 @@ import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zby.corelib.BleManager;
+import com.zby.corelib.BluetoothLeService;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
@@ -37,17 +39,15 @@ public class DeviceListActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initViews();
-
         BleManager.getInstance().bluetoothEnable();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //6.0蓝牙搜索需要 location权限
-            //new RxPermissions(this)
-            //        .request(Manifest.permission.ACCESS_COARSE_LOCATION,
-            //        Manifest.permission.ACCESS_FINE_LOCATION);
+            //6.0系统蓝牙搜索需要 location权限
+            new RxPermissions(this)
+                    .request(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
             mRefreshLayout.autoRefresh();
         }
-        registerBroadcast();
     }
 
     private void initViews() {
@@ -100,13 +100,12 @@ public class DeviceListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onLinked(DeviceBean db) {
+            public void onLinked(final DeviceBean db) {
                 AppApplication.sDeviceBean = db;
                 startActivity(new Intent(DeviceListActivity.this, DeviceDetailActivity.class));
-                //db.getStatus();
-                //db.setKey(BleManager.DEFAULT_KEY);
+                db.setKey(BleManager.DEFAULT_KEY);
                 db.sendReadStatus();
-                //db.sendSetLockOpen();
+
             }
 
             @Override
@@ -118,33 +117,4 @@ public class DeviceListActivity extends AppCompatActivity {
         });
     }
 
-    private void registerBroadcast() {
-        //IntentFilter interFilter = new IntentFilter(ConnectAction.ACTION_BLUETOOTH_FOUND);
-        //interFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        //registerReceiver(receiver, interFilter);
-        //registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-    }
-
-    //private void addOrUpdateDeviceBean(String name, String mac, boolean isbond) {
-    //    DeviceBean dbin;
-    //    for (int i = 0; i < mDeviceBeanList.size(); i++) {
-    //        if (mDeviceBeanList.get(i).getMac().equals(mac)) {
-    //            //mDeviceBeanList.get(i).setName(name);
-    //            return;
-    //        }
-    //    }
-    //    //dbin = new DeviceBean();
-    //    //dbin.setName(name);
-    //    //dbin.setMac(mac);
-    //    //dbin.setConnectionInterface(mInterface, this);
-    //    mDeviceBeanList.add(dbin);
-    //    mAdapter.setData(mDeviceBeanList);
-    //    mAdapter.notifyDataSetChanged();
-    //}
-
-    @Override
-    protected void onDestroy() {
-        //BleManager.getInstance().destroy();
-        super.onDestroy();
-    }
 }

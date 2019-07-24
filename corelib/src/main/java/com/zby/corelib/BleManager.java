@@ -14,8 +14,10 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -43,8 +45,8 @@ public class BleManager {
     private DeviceBean             mDb;
     private List<DeviceBean>       mDeviceList = new ArrayList<>();
 
-    private Thread      scanThread;
-    private Set<String> mMacSet = new HashSet<>();
+    private Thread            scanThread;
+    //private Map<String, Long> mMacMap = new HashMap<>();
 
     /**
      * default AES128 KEY
@@ -136,7 +138,7 @@ public class BleManager {
 
     /**
      * scan device
-     *
+     * Stop automatically after 10 seconds
      * @param isStartScan true startScan, false stop Scan
      */
     public void startScan(boolean isStartScan) {
@@ -162,7 +164,7 @@ public class BleManager {
                     return;
                 }
             }
-            mMacSet.clear();
+            //mMacMap.clear();
             scanThread.start();
         } else { //关闭搜索线程
             if (scanThread != null) {
@@ -208,10 +210,17 @@ public class BleManager {
                 return;
             }
             // TODO Auto-generated method stub
-            //if (!mMacSet.contains(arg0.getAddress())) {//避免一次搜索， 同一个设备多次回调
+            //if (mMacMap.containsKey(arg0.getAddress())) {
+            //    //避免一次搜索， 同一个设备多次回调
+            //    long delayTime = System.currentTimeMillis() - mMacMap.get(arg0.getAddress());
+            //    if (delayTime < 500) {
+            //        Log.i(TAG, " filter --- > " + arg0.getAddress());
+            //        return;
+            //    }
+            //}
             int ele = MyByteUtils.byteToInt(arg2[15]);
             int onoff = MyByteUtils.byteToInt(arg2[17]);
-            //mMacSet.add(arg0.getAddress());
+            //mMacMap.put(arg0.getAddress(), System.currentTimeMillis());
             foundDevice(arg0, arg1, ele, onoff == 1);
             //}
         }
