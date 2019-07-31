@@ -23,7 +23,8 @@ android {
 }
 
 task exportJar(type: Copy) {
-  delete 'build/outputs/corelib-release.aar'
+  delete "build/libs/zbyble_lock_v"+ android.defaultConfig.versionName +".aar"
+  //jar 位置 from("build/intermediates/packaged-classes/release/classes.jar"
   from('build/outputs/aar/')
   into('build/libs/')
   include('corelib-release.aar')

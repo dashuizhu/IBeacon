@@ -29,10 +29,8 @@
 -keep class com.zby.corelib.BleManager {
     public *;
 }
--keep class com.zby.corelib.BleManager$OnDeviceUpdateListener {
-    *;
-}
--keep class com.zby.corelib.BleManager$OnScanDeviceListener {
+#保留bleManager中的所有内部类
+-keep class com.zby.corelib.BleManager$* {
     *;
 }
 
