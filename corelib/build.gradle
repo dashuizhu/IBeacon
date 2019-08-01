@@ -8,26 +8,32 @@ android {
   defaultConfig {
     minSdkVersion 19
     targetSdkVersion 28
-    versionCode 1
-    versionName "1.0"
+    versionCode 2
+    versionName "1.1"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
   buildTypes {
     release {
-      minifyEnabled false
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
 }
 
 task exportJar(type: Copy) {
-  delete 'build/outputs/corelib-release.aar'
-  from('build/outputs/aar/')
+  delete "build/libs/zbyble_ibeacon_v"+ android.defaultConfig.versionName +".jar"
+  //jar 位置
+  from("build/intermediates/packaged-classes/release/")
   into('build/libs/')
-  include('corelib-release.aar')
-  rename ('corelib-release.aar', 'zbyble.aar')
+  include('classes.jar')
+  rename ('classes.jar', "zbyble_ibeacon_v"+ android.defaultConfig.versionName +".jar")
+
+//  from('build/outputs/aar/')
+//  into('build/libs/')
+//  include('corelib-release.aar')
+//  rename ('corelib-release.aar', 'zbyble.aar')
 }
 
 dependencies {

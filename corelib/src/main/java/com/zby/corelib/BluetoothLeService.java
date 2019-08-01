@@ -96,8 +96,7 @@ public class BluetoothLeService extends Service {
                         // if(!isReconnect) {
                         intentAction = ConnectAction.ACTION_GATT_DISCONNECTED;
                         Log.i(TAG, "Disconnected from GATT server.");
-                        removeGatt(gattMapsConnting, address);
-                        removeGatt(gattMaps, address);
+                        close(address);
                         broadcastUpdate(intentAction, address);
                         // } else {
                         // intentAction = ACTION_GATT_RECONNECTING;

@@ -1,5 +1,6 @@
 package com.zby.ibeacon.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.tbruyelle.rxpermissions.RxPermissions;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
@@ -40,13 +42,12 @@ public class DeviceListActivity extends AppCompatActivity {
         BleManager.getInstance().bluetoothEnable();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //6.0蓝牙搜索需要 location权限
-            //new RxPermissions(this)
-            //        .request(Manifest.permission.ACCESS_COARSE_LOCATION,
-            //        Manifest.permission.ACCESS_FINE_LOCATION);
+            new RxPermissions(this)
+                    .request(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
             mRefreshLayout.autoRefresh();
         }
-        registerBroadcast();
     }
 
     private void initViews() {
@@ -113,30 +114,6 @@ public class DeviceListActivity extends AppCompatActivity {
             }
         });
     }
-
-    private void registerBroadcast() {
-        //IntentFilter interFilter = new IntentFilter(ConnectAction.ACTION_BLUETOOTH_FOUND);
-        //interFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        //registerReceiver(receiver, interFilter);
-        //registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-    }
-
-    //private void addOrUpdateDeviceBean(String name, String mac, boolean isbond) {
-    //    DeviceBean dbin;
-    //    for (int i = 0; i < mDeviceBeanList.size(); i++) {
-    //        if (mDeviceBeanList.get(i).getMac().equals(mac)) {
-    //            //mDeviceBeanList.get(i).setName(name);
-    //            return;
-    //        }
-    //    }
-    //    //dbin = new DeviceBean();
-    //    //dbin.setName(name);
-    //    //dbin.setMac(mac);
-    //    //dbin.setConnectionInterface(mInterface, this);
-    //    mDeviceBeanList.add(dbin);
-    //    mAdapter.setData(mDeviceBeanList);
-    //    mAdapter.notifyDataSetChanged();
-    //}
 
     @Override
     protected void onDestroy() {

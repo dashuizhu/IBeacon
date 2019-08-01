@@ -19,3 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+#忽略警告
+-ignorewarnings
+#保证是独立的jar,没有任何项目引用,如果不写就会认为我们所有的代码是无用的,从而把所有的代码压缩掉,导出一个空的jar
+-dontshrink
+#保护泛型、内部类
+-keepattributes Signature,InnerClasses
+
+-keep class com.zby.corelib.BleManager {
+    public *;
+}
+#保留bleManager中的所有内部类
+-keep class com.zby.corelib.BleManager$* {
+    *;
+}
+
+-keepnames class com.zby.corelib.BluetoothLeService
+-keepnames class com.zby.corelib.DeviceBean {*;}
