@@ -103,7 +103,8 @@ public class DeviceListActivity extends AppCompatActivity {
             public void onLinked(final DeviceBean db) {
                 AppApplication.sDeviceBean = db;
                 startActivity(new Intent(DeviceListActivity.this, DeviceDetailActivity.class));
-                db.setKey(BleManager.DEFAULT_KEY);
+                //!!!!!  根据当前硬件 加密情况， 设置软件 key 一致， 这样发下去的协议，硬件才能识别
+                //db.setKey(BleManager.DEFAULT_KEY);
                 db.sendReadStatus();
 
             }

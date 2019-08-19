@@ -15,6 +15,29 @@
         android:padding="@dimen/activity_horizontal_margin" />
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="setNowKey"
+            android:text="保存软件key"/>
+
+        <EditText
+            android:id="@+id/et_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:maxLength="16"
+            android:hint="设置软件key"/>
+
+    </LinearLayout>
+
+
     <!--<TextView-->
         <!--android:id="@+id/tv_name"-->
         <!--android:layout_width="match_parent"-->
@@ -31,7 +54,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setUnlock"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="开锁" />
+        android:text="发送开锁" />
 
     <TextView
         android:id="@+id/tv_major"
@@ -40,7 +63,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setChangeMode"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="转换密钥模式" />
+        android:text="发送转换密钥模式" />
 
     <TextView
         android:id="@+id/tv_uuid"
@@ -49,7 +72,7 @@
         android:background="@drawable/layout_selector"
         android:onClick="setKey"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="设置Key" />
+        android:text="发送设置硬件Key为 1234567890111111" />
 
 
 
