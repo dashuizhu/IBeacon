@@ -23,12 +23,17 @@ android {
 }
 
 task exportJar(type: Copy) {
-  delete "build/libs/zbyble_lock_v"+ android.defaultConfig.versionName +".aar"
-  //jar 位置 from("build/intermediates/packaged-classes/release/classes.jar"
-  from('build/outputs/aar/')
+  delete "build/libs/zbyble_lock_v"+ android.defaultConfig.versionName +".jar"
+  //jar 位置
+  from("build/intermediates/packaged-classes/release/")
   into('build/libs/')
-  include('corelib-release.aar')
-  rename ('corelib-release.aar', "zbyble_lock_v"+ android.defaultConfig.versionName +".aar")
+  include('classes.jar')
+  rename ('classes.jar', "zbyble_lock_v"+ android.defaultConfig.versionName +".jar")
+
+  //  from('build/outputs/aar/')
+  //  into('build/libs/')
+  //  include('corelib-release.aar')
+  //  rename ('corelib-release.aar', 'zbyble.aar')
 }
 
 dependencies {

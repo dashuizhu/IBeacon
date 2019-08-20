@@ -4,10 +4,10 @@ android {
   compileSdkVersion 28
   signingConfigs {
     signing {
-      keyAlias 'buddy'
-      keyPassword 'person2017'
-      storeFile file('person.jks')
-      storePassword 'person2017'
+      keyAlias 'key'
+      keyPassword 'keystore'
+      storeFile file('key.jks')
+      storePassword 'keystore'
     }
   }
   defaultConfig {
@@ -53,8 +53,6 @@ dependencies {
   compileOnly 'org.projectlombok:lombok:1.16.14'
   compileOnly 'org.glassfish:javax.annotation:10.0-b28'
   implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
-//  implementation files('libs/zbyble_lock.aar')
-//  implementation files('libs/zbyble_lock_v1.1.aar')
-//  implementation files('libs/zby_lock.jar')
-  implementation project(path: ':corelib')
+//  implementation files('libs/zbyble_lock_v1.1.jar')
+//  implementation project(path: ':corelib')
 }
