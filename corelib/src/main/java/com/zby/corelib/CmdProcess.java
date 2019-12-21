@@ -8,6 +8,7 @@ import java.util.Set;
  * 对收到的数据字节，全部缓存起来， 等识别出一条符合协议的数据时，将截取出来的协议数据进行解析
  * Created by zhuj on 2016/7/13 16:19.
  */
+@Deprecated
 class CmdProcess {
 
     private final static String TAG = "cmdProcess";
@@ -32,19 +33,19 @@ class CmdProcess {
 
     private Set<Byte> mCmdSet = new HashSet() {
         {
-            add(CmdParseImpl.type_password);
-            add(CmdParseImpl.type_frequency);
-            add(CmdParseImpl.type_major);
-            add(CmdParseImpl.type_minor);
-            add(CmdParseImpl.type_uuid_set);
-            add(CmdParseImpl.type_password_set);
-            add(CmdParseImpl.type_name);
-            add(CmdParseImpl.type_rate);
-            add(CmdParseImpl.type_light);
-            add(CmdParseImpl.type_status);
-            add(CmdParseImpl.type_name_read);
-            add(CmdParseImpl.type_uuid_red);
-            add(CmdParseImpl.type_cmd);
+//            add(CmdParseImpl.type_password);
+//            add(CmdParseImpl.type_frequency);
+//            add(CmdParseImpl.type_major);
+//            add(CmdParseImpl.type_minor);
+//            add(CmdParseImpl.type_uuid_set);
+//            add(CmdParseImpl.type_password_set);
+//            add(CmdParseImpl.type_name);
+//            add(CmdParseImpl.type_rate);
+//            add(CmdParseImpl.type_light);
+//            add(CmdParseImpl.type_status);
+//            add(CmdParseImpl.type_name_read);
+//            add(CmdParseImpl.type_uuid_red);
+//            add(CmdParseImpl.type_cmd);
         }
     };
 

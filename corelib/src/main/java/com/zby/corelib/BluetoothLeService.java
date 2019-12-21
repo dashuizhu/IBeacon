@@ -30,9 +30,13 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +76,8 @@ public class BluetoothLeService extends Service {
             UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private static final UUID RECEIVER_CHARACTERISTIC =
             UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb");
+
+    private MyHandler mHandler;
 
     // Implements callback methods for GATT events that the app cares about. For
     // example,
@@ -209,6 +215,7 @@ public class BluetoothLeService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mHandler = new MyHandler(this);
         return mBinder;
     }
 
@@ -407,29 +414,30 @@ public class BluetoothLeService extends Service {
      * @param characteristic Characteristic to act on.
      * @param enabled If true, enable notification. False otherwise.
      */
-    void setCharacteristicNotification(BluetoothGatt mBluetoothGatt,
+    boolean setCharacteristicNotification(BluetoothGatt mBluetoothGatt,
             BluetoothGattCharacteristic characteristic, boolean enabled) {
         //BluetoothGatt mBluetoothGatt = null;
         //mBluetoothGatt = getGatt(gattMaps, address);
         if (mBluetoothGatt != null) {
             if (mBluetoothAdapter == null || mBluetoothGatt == null) {
                 Log.w(TAG, "BluetoothAdapter not initialized");
-                return;
+                return false;
             }
             boolean isEnable =
                     mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
             Log.d(TAG,
                     RECEIVER_CHARACTERISTIC.toString() + " " + characteristic.getUuid().toString());
-            List<BluetoothGattDescriptor> list = characteristic.getDescriptors();
-            if (list.size() > 0) {
-                characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                BluetoothGattDescriptor descriptor = list.get(0);
-                if (descriptor != null) {
-                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                }
-                mBluetoothGatt.writeDescriptor(descriptor);
+
+            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
+            boolean setValue = descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            if (descriptor != null) {
+                boolean writeDesc = mBluetoothGatt.writeDescriptor(descriptor);
+                LogUtils.logD(TAG, mBluetoothGatt.hashCode() + " setreceiver  " + setValue + " " + writeDesc);
+
+                return setValue && writeDesc;
             }
         }
+        return false;
     }
 
     /**
@@ -543,7 +551,19 @@ public class BluetoothLeService extends Service {
         if (characteristic == null) {
             return;
         }
-        setCharacteristicNotification(mBluetoothGatt, characteristic, true);
+
+        BluetoothGattCharacteristic characteristic2 =
+                linkLossService.getCharacteristic(SEND_CHARACTERISTIC_UUID);
+
+        //没有设置成功，就重设监听
+        boolean notify1 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
+        boolean notify2 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
+        if (! (notify1 && notify2)) {
+            Message msg = mHandler.obtainMessage();
+            msg.what = handler_set_notify1;
+            msg.obj = mBluetoothGatt.getDevice().getAddress();
+            mHandler.sendMessageDelayed(msg, 300);
+        }
     }
 
     private BluetoothGatt getGatt(Map<String, BluetoothGatt> map, String address) {
@@ -591,5 +611,40 @@ public class BluetoothLeService extends Service {
         mToast.setText(str);
         mToast.setDuration(Toast.LENGTH_LONG);
         mToast.show();
+    }
+
+    static final int handler_set_notify1        = 103;
+    static final int handler_set_notify2        = 103;
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<BluetoothLeService> mActivity;
+
+        public MyHandler(BluetoothLeService context) {
+            mActivity = new WeakReference<BluetoothLeService>(context);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            LogUtils.logD(TAG, "onHandlerMessage " + msg.what);
+            BluetoothLeService service = mActivity.get();
+            if (service != null) {
+
+                BluetoothGatt gatt;
+                String address;
+                switch (msg.what) {
+
+                    case BluetoothLeService.handler_set_notify1:
+                        address = (String) msg.obj;
+                        gatt = service.gattMaps.get(address);
+                        if (gatt != null && gatt.connect()) {
+                            service.setReceiver(gatt);
+                        }
+                        break;
+                    default:
+                }
+
+            }
+        }
     }
 }

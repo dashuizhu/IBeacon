@@ -9,4 +9,6 @@
     <string name="label_set_minor">设置minor</string>
     <string name="toast_lostLink">断开连接</string>
     <string name="toast_linking">正在连接中....</string>
+    <string name="label_disconnect">disConnect</string>
+    <string name="label_connect">connect</string>
 </resources>

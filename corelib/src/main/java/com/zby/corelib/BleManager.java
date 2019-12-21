@@ -30,7 +30,6 @@ public class BleManager {
     private Context            mContext;
 
     IConnectInterface mInterface;
-    private CmdProcess   mCmdProcess;
     private CmdParseImpl mCmdParse;
 
     private static volatile BleManager mBleManager;
@@ -106,7 +105,6 @@ public class BleManager {
 
         context.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         mCmdParse = new CmdParseImpl(mContext);
-        mCmdProcess = new CmdProcess(mCmdParse);
     }
 
     public void bluetoothEnable() {
@@ -270,7 +268,8 @@ public class BleManager {
                 byte[] buffer = intent.getByteArrayExtra(ConnectAction.BROADCAST_DATA_value);
                 LogUtils.logV("bleManager", mac + "接受数据:" + MyHexUtils.buffer2String(buffer));
                 if (mDb != null) {
-                    mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
+//                    mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
+                    mCmdParse.parseData(mDb, buffer);
                     if (mDeviceUpdateListener != null) {
                         mDeviceUpdateListener.onDataUpdate(mDb);
                     }

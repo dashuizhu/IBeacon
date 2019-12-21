@@ -11,19 +11,8 @@ class CmdParseImpl implements ICmdParseInterface {
 
     private final static String TAG = CmdParseImpl.class.getSimpleName();
 
-    static final byte type_password     = (byte) 0xB1;
-    static final byte type_frequency    = (byte) 0xB2;
-    static final byte type_major        = (byte) 0xB3;
-    static final byte type_minor        = (byte) 0xB4;
-    static final byte type_uuid_set     = (byte) 0xB5;
-    static final byte type_password_set = (byte) 0xB6;
-    static final byte type_name         = (byte) 0xB7;
-    static final byte type_rate         = (byte) 0xB8;
-    static final byte type_light        = (byte) 0xB9;
-    static final byte type_status       = (byte) 0xBA;
-    static final byte type_name_read    = (byte) 0xBB;
-    static final byte type_uuid_red     = (byte) 0xBC;
-    static final byte type_cmd          = (byte) 0xBD;
+    static final byte type_baby_set    = (byte) 0x42;
+    static final byte type_ele          = (byte) 0x02;
 
     private Context mContext;
 
@@ -44,34 +33,22 @@ class CmdParseImpl implements ICmdParseInterface {
         byte[] newBuff;
         String str;
         switch (dataBuff[0]) {
-            case type_status:
-                db.broadcastFrequency =
-                        MyByteUtils.byteToInt(dataBuff[1]) * 256 + MyByteUtils.byteToInt(
-                                dataBuff[2]);
-                int a = MyByteUtils.byteToInt(dataBuff[3]);
-                int a1 = MyByteUtils.byteToInt(dataBuff[4]);
-                db.major = a + a1;
-                db.minor = MyByteUtils.byteToInt(dataBuff[5]) * 256 + MyByteUtils.byteToInt(
-                        dataBuff[6]);
-                db.power = MyByteUtils.byteToInt(dataBuff[7]) * 256 + MyByteUtils.byteToInt(
-                        dataBuff[8]);
-                db.onOff = MyByteUtils.byteToInt(dataBuff[9]) == 1;
-                //db.electricity = MyByteUtils.byteToInt(dataBuff[10]);
+            case type_baby_set:
+                if (dataBuff[13] == 0x52) {
+                    db.isBabySeat = true;
+                } else {
+                    db.isBabySeat = false;
+                }
 
                 break;
-            case type_name_read:
-                newBuff = new byte[dataBuff.length - 1];
-                System.arraycopy(dataBuff, 1, newBuff, 0, newBuff.length);
-                str = new String(newBuff);
-                db.name = str;
+            case type_ele:
+                if (dataBuff[2] == 0x4c) {
+                    db.isEleLow = true;
+                } else {
+                    db.isEleLow = false;
+                }
                 break;
-            case type_uuid_red:
-                newBuff = new byte[dataBuff.length - 1];
-                System.arraycopy(dataBuff, 1, newBuff, 0, newBuff.length);
-                str = MyHexUtils.buffer2String(newBuff);
-                //str = new String(newBuff);
-                db.uuid = str.toUpperCase();
-                break;
+
             default:
         }
     }

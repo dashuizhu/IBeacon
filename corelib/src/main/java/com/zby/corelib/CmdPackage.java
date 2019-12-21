@@ -3,6 +3,7 @@ package com.zby.corelib;
 /**
  * 协议
  */
+@Deprecated
 class CmdPackage {
 
     /**

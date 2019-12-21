@@ -53,7 +53,9 @@ dependencies {
   compileOnly 'org.projectlombok:lombok:1.16.14'
   compileOnly 'org.glassfish:javax.annotation:10.0-b28'
   implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
+  implementation "io.reactivex.rxjava2:rxandroid:$rxandroid"
+  implementation "io.reactivex.rxjava2:rxjava:$rxjava"
   //  implementation files('libs/zbyble.aar')
-  implementation files('libs/zbyble_ibeacon_v1.1.jar')
-//  implementation project(path: ':corelib')
+//  implementation files('libs/zbyble_ibeacon_v1.1.jar')
+  implementation project(path: ':corelib')
 }
