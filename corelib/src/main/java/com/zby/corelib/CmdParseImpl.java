@@ -26,7 +26,8 @@ class CmdParseImpl implements ICmdParseInterface {
             return;
         }
         String strBuffer = MyHexUtils.buffer2String(dataBuff);
-        LogUtils.logD(TAG, "解析数据:" + strBuffer);
+        String data = new String(dataBuff);
+        LogUtils.logD(TAG, "解析数据:" + data + strBuffer );
         if (dataBuff.length < 2) {
             return;
         }

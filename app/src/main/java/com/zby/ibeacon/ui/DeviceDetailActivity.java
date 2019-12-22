@@ -7,22 +7,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
-import com.zby.ibeacon.adapter.DeviceAdapter;
 import com.zby.ibeacon.utils.BeepManager;
 import com.zby.ibeacon.utils.ClickUtils;
 import com.zby.ibeacon.utils.ToastUtils;
@@ -46,7 +41,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
     @BindView(R.id.progressBar) ProgressBar      mProgressBar;
     @BindView(R.id.cl_title)    ConstraintLayout mClTitle;
     @BindView(R.id.tv_babySeat) TextView         mTvBabySeat;
-    @BindView(R.id.iv_ele)      ImageView        mIvEle;
+    @BindView(R.id.iv_ele)      TextView        mTvEle;
     @BindView(R.id.iv_warning)  ImageView        mIvWarning;
 
     private DeviceBean db;
@@ -98,8 +93,8 @@ public class DeviceDetailActivity extends AppCompatActivity {
             public void onDataUpdate(DeviceBean deviceBean) {
                 initStatus();
                 if (deviceBean.isBabySeat()) {
-                    mHandler.removeMessages(handle_alert);
-                    mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
+                    //mHandler.removeMessages(handle_alert);
+                    //mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
                     Log.w(TAG, "开始5秒延迟 报警");
                 } else {
                     mHandler.removeMessages(handle_alert);
@@ -140,12 +135,16 @@ public class DeviceDetailActivity extends AppCompatActivity {
             mHandler.sendEmptyMessage(handle_Link);
 
             mHandler.removeMessages(handle_alert);
-            mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
+            //mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
+
         }
 
         @Override
         public void onLostLink(DeviceBean db) {
             mHandler.sendEmptyMessage(handle_lostLink);
+            if (db.isBabySeat()) {
+                mHandler.sendEmptyMessage(handle_alert);
+            }
         }
     };
 
@@ -156,8 +155,10 @@ public class DeviceDetailActivity extends AppCompatActivity {
     }
 
     private void initStatus() {
-        mTvBabySeat.setText(db.isBabySeat() ? "座椅有人" : "座椅为空");
-        mIvEle.setBackgroundResource(db.isEleLow() ? R.mipmap.img_ele_low : R.mipmap.img_ele_full);
+        mTvBabySeat.setText(db.isBabySeat() ? "坐姿正确" : "座椅为空");
+        mTvBabySeat.setSelected(db.isBabySeat());
+        mTvEle.setSelected(db.isEleLow());
+        mTvEle.setText(db.isEleLow()? "电量不足":"电量充足");
     }
 
 
@@ -180,12 +181,14 @@ public class DeviceDetailActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.tv_connect:
-                mTvConnect.setVisibility(View.GONE);
-                mProgressBar.setVisibility(View.VISIBLE);
+                Log.e(TAG, " click tv_conenct " + BleManager.getInstance().isConnected(db));
                 if (BleManager.getInstance().isConnected(db)) {
                     BleManager.getInstance().stopConnect();
+
                 } else {
                     BleManager.getInstance().connect(db);
+                    mTvConnect.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                 }
                 break;
             case R.id.iv_warning:

@@ -75,7 +75,7 @@ public class BluetoothLeService extends Service {
     private static final UUID RECEIVER_SERVICE        =
             UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private static final UUID RECEIVER_CHARACTERISTIC =
-            UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb");
 
     private MyHandler mHandler;
 
@@ -425,14 +425,14 @@ public class BluetoothLeService extends Service {
             }
             boolean isEnable =
                     mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-            Log.d(TAG,
-                    RECEIVER_CHARACTERISTIC.toString() + " " + characteristic.getUuid().toString());
+            LogUtils.logD(TAG,
+                    characteristic.getUuid().toString());
 
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
             boolean setValue = descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             if (descriptor != null) {
                 boolean writeDesc = mBluetoothGatt.writeDescriptor(descriptor);
-                LogUtils.logD(TAG, mBluetoothGatt.hashCode() + " setreceiver  " + setValue + " " + writeDesc);
+                LogUtils.logD(TAG, characteristic.getUuid().toString() + " setreceiver  " + setValue + " " + writeDesc);
 
                 return setValue && writeDesc;
             }
@@ -556,14 +556,14 @@ public class BluetoothLeService extends Service {
                 linkLossService.getCharacteristic(SEND_CHARACTERISTIC_UUID);
 
         //没有设置成功，就重设监听
+        boolean notify2 = setCharacteristicNotification(mBluetoothGatt, characteristic2, true);
         boolean notify1 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
-        boolean notify2 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
-        if (! (notify1 && notify2)) {
-            Message msg = mHandler.obtainMessage();
-            msg.what = handler_set_notify1;
-            msg.obj = mBluetoothGatt.getDevice().getAddress();
-            mHandler.sendMessageDelayed(msg, 300);
-        }
+        //if (! (notify1 && notify2)) {
+        //    Message msg = mHandler.obtainMessage();
+        //    msg.what = handler_set_notify1;
+        //    msg.obj = mBluetoothGatt.getDevice().getAddress();
+        //    mHandler.sendMessageDelayed(msg, 300);
+        //}
     }
 
     private BluetoothGatt getGatt(Map<String, BluetoothGatt> map, String address) {

@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
+            android:text="@string/app_name"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -64,12 +65,16 @@
 
 
 
-    <ImageView
+    <TextView
         android:id="@+id/iv_ele"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:background="@mipmap/img_ele_full"
+        android:drawableTop="@mipmap/img_ele_full"
+        android:textColor="@drawable/text_ele"
+        android:gravity="center"
+        android:text=""
+        android:drawablePadding="4dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cl_title" />
 
@@ -88,10 +93,13 @@
         android:id="@+id/tv_babySeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@mipmap/ic_launcher"
+        android:drawableTop="@mipmap/ic_launcher"
         android:gravity="center"
         android:padding="@dimen/activity_horizontal_margin"
-        android:text="@string/label_set_cmd_deploy"
+        android:text=""
+        android:textColor="@drawable/text_ele"
+        android:textSize="18sp"
+        android:drawablePadding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

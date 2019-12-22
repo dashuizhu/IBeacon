@@ -23,6 +23,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -53,14 +54,16 @@ public class BeepManager {
                 Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                 mRingtone = RingtoneManager.getRingtone(activity.getApplicationContext(), uri);
             }
-            mRingtone.setLooping(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                mRingtone.setLooping(true);
+            }
             mRingtone.play();
         }
 
         if (vibrate) {
-            Vibrator vibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
+            mVibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
             //按照指定的模式去震动。这里的-1是指震动不连续，定义为0的话就代表一直震动下去
-            vibrator.vibrate(new long[]{200,500,200,500}, 0);
+            mVibrator.vibrate(new long[]{200,500,200,500}, 0);
         }
     }
 

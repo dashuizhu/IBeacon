@@ -32,7 +32,11 @@ android {
   buildTypes {
     release {
       minifyEnabled false
+      signingConfig signingConfigs.signing
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+    debug{
+      signingConfig signingConfigs.signing
     }
   }
   buildToolsVersion '28.0.3'

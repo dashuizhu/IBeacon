@@ -294,7 +294,6 @@ public class BleManager {
      */
     public void stopConnect() {
         mInterface.stopConncet();
-        mDb = null;
     }
 
     public boolean isConnecting() {
