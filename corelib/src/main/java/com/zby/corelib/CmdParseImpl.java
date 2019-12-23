@@ -36,9 +36,9 @@ class CmdParseImpl implements ICmdParseInterface {
         switch (dataBuff[0]) {
             case type_baby_set:
                 if (dataBuff[13] == 0x52) {
-                    db.isBabySeat = true;
+                    db.babySeatStatus = 1;
                 } else {
-                    db.isBabySeat = false;
+                    db.babySeatStatus = 2;
                 }
 
                 break;

@@ -8,9 +8,9 @@ public class DeviceBean {
     String  mac;
     String  name;
     /**
-     * 孩子坐姿是否正确
+     * 孩子坐姿是否正确  1有 2false 0为空
      */
-    boolean isBabySeat;
+    int  babySeatStatus;
     /**
      * 是否低电量
      */
@@ -37,12 +37,23 @@ public class DeviceBean {
     }
 
     public boolean isBabySeat() {
-        return isBabySeat;
+        return babySeatStatus == 1;
+    }
+
+    public boolean isBabyEmpty() {
+        return babySeatStatus == 2;
+    }
+
+    public int getBabySeatStatus() {
+        return babySeatStatus;
+    }
+
+    public void initStatus() {
+        this.babySeatStatus = 2;
     }
 
     public boolean isEleLow() {
         return isEleLow;
     }
-
 
 }

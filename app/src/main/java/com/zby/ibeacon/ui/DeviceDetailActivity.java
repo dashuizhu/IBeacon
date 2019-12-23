@@ -62,6 +62,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
 
                     break;
                 case handle_Link:
+                    db.initStatus();
                     initStatus();
                     mTvConnect.setText(R.string.label_disconnect);
                     mTvConnect.setVisibility(View.VISIBLE);
@@ -98,6 +99,11 @@ public class DeviceDetailActivity extends AppCompatActivity {
                     //mHandler.removeMessages(handle_alert);
                     //mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
                     Log.w(TAG, "开始5秒延迟 报警");
+
+                    if (mBeepManager == null) {
+                        mBeepManager = new BeepManager(DeviceDetailActivity.this);
+                    }
+                    mBeepManager.vibrateOne();
                 } else {
                     mHandler.removeMessages(handle_alert);
                 }
@@ -159,8 +165,19 @@ public class DeviceDetailActivity extends AppCompatActivity {
     }
 
     private void initStatus() {
-        mTvBabySeat.setText(db.isBabySeat() ? "坐姿正确" : "座椅为空");
-        mTvBabySeat.setSelected(db.isBabySeat());
+        switch (db.getBabySeatStatus()) {
+            case 1:
+                mTvBabySeat.setText("坐姿正确");
+                mTvBabySeat.setSelected(true);
+                break;
+            case 2:
+                mTvBabySeat.setSelected(false);
+                mTvBabySeat.setText("座椅为空");
+                break;
+            default:
+                mTvBabySeat.setSelected(false);
+                mTvBabySeat.setText("");
+        }
         mTvEle.setSelected(db.isEleLow());
         mTvEle.setText(db.isEleLow()? "电量不足":"电量充足");
     }

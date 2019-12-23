@@ -175,4 +175,11 @@ public class DeviceListActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.GONE);
         BleManager.getInstance().addOnScanDeviceListener(mListener);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        BleManager.getInstance().startScan(false);
+        mHandler.sendEmptyMessage(handle_scanFinish);
+    }
 }

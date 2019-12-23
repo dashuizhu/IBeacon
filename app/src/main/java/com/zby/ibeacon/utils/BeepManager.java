@@ -51,7 +51,7 @@ public class BeepManager {
     public synchronized void playBeepSoundAndVibrate() {
         if (playBeep) {
             if (mRingtone == null) {
-                Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
                 mRingtone = RingtoneManager.getRingtone(activity.getApplicationContext(), uri);
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -65,6 +65,14 @@ public class BeepManager {
             //按照指定的模式去震动。这里的-1是指震动不连续，定义为0的话就代表一直震动下去
             mVibrator.vibrate(new long[]{200,500,200,500}, 0);
         }
+    }
+
+    public void vibrateOne() {
+        if (mVibrator == null) {
+            mVibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+        //按照指定的模式去震动。这里的-1是指震动不连续，定义为0的话就代表一直震动下去
+        mVibrator.vibrate(200);
     }
 
     public void close() {
