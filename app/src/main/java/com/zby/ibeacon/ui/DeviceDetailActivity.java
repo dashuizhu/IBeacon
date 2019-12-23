@@ -66,6 +66,8 @@ public class DeviceDetailActivity extends AppCompatActivity {
                     mTvConnect.setText(R.string.label_disconnect);
                     mTvConnect.setVisibility(View.VISIBLE);
                     mProgressBar.setVisibility(View.GONE);
+                    ToastUtils.toast(DeviceDetailActivity.this,"连接成功");
+//                    .show();
                     break;
                 case handle_alert:
                     startAlertAnimation();
@@ -117,7 +119,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
 
             if (deviceBean.getMac().equals(db.getMac())) {
                 mHandler.removeMessages(handle_alert);
-                mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
+                //mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
                 Log.w(TAG, "开始5秒延迟 报警");
             }
 
@@ -126,7 +128,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
 
         @Override
         public void onScanFinsih() {
-            BleManager.getInstance().startScan(true);
+//            BleManager.getInstance().startScan(true);
         }
 
         @Override
@@ -135,6 +137,8 @@ public class DeviceDetailActivity extends AppCompatActivity {
             mHandler.sendEmptyMessage(handle_Link);
 
             mHandler.removeMessages(handle_alert);
+
+
             //mHandler.sendEmptyMessageDelayed(handle_alert, DELAY_TIME);
 
         }
@@ -165,7 +169,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         mHandler.removeCallbacksAndMessages(null);
-        BleManager.getInstance().startScan(false);
+//        BleManager.getInstance().startScan(false);
         BleManager.getInstance().stopConnect();
         stopAlertAnimation();
         super.onDestroy();
@@ -184,6 +188,9 @@ public class DeviceDetailActivity extends AppCompatActivity {
                 Log.e(TAG, " click tv_conenct " + BleManager.getInstance().isConnected(db));
                 if (BleManager.getInstance().isConnected(db)) {
                     BleManager.getInstance().stopConnect();
+                    mTvConnect.setText(R.string.label_connect);
+                    mTvConnect.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.GONE);
 
                 } else {
                     BleManager.getInstance().connect(db);
@@ -194,6 +201,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
             case R.id.iv_warning:
                 stopAlertAnimation();
                 break;
+            default:
         }
     }
 

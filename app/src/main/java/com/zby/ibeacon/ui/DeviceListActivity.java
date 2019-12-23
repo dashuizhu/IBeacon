@@ -20,6 +20,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
+import com.zby.ibeacon.AppConstants;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
 import com.zby.ibeacon.utils.ToastUtils;
@@ -121,6 +122,9 @@ public class DeviceListActivity extends AppCompatActivity {
     BleManager.OnScanDeviceListener mListener = new BleManager.OnScanDeviceListener() {
         @Override
         public synchronized void onDeviceFound(DeviceBean db) {
+            if (db.getName() == null || (!AppConstants.BLUE_NAME.equals(db.getName().toLowerCase().trim()))) {
+                return;
+            }
             for (int i = 0; i < mAdapter.getData().size(); i++) {
                 if (mAdapter.getData().get(i).getMac().equals(db.getMac())) {
                     //mAdapter.getData().set(i, db);

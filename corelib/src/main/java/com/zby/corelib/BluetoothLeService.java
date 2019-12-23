@@ -94,14 +94,14 @@ public class BluetoothLeService extends Service {
                         removeGatt(gattMapsConnting, address);
                         addGatt(gattMaps, address, gatt);
                         broadcastUpdate(intentAction, address);
-                        Log.i(TAG, "Connected to GATT server.");
+                        LogUtils.logI(TAG, "Connected to GATT server.");
                         // Attempts to discover services after successful connection.
-                        Log.i(TAG,
+                        LogUtils.logI(TAG,
                                 "Attempting to start service discovery:" + gatt.discoverServices());
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         // if(!isReconnect) {
                         intentAction = ConnectAction.ACTION_GATT_DISCONNECTED;
-                        Log.i(TAG, "Disconnected from GATT server.");
+                        LogUtils.logI(TAG, "Disconnected from GATT server.");
                         close(address);
                         broadcastUpdate(intentAction, address);
                         // } else {
@@ -128,7 +128,7 @@ public class BluetoothLeService extends Service {
 
                 @Override
                 public void onCharacteristicRead(BluetoothGatt gatt,
-                        BluetoothGattCharacteristic characteristic, int status) {
+                                                 BluetoothGattCharacteristic characteristic, int status) {
                     Log.i(TAG, "onCharacteristicRead");
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         broadcastUpdate(ConnectAction.ACTION_RECEIVER_DATA, characteristic);
@@ -140,13 +140,13 @@ public class BluetoothLeService extends Service {
                  */
                 @Override
                 public void onCharacteristicChanged(BluetoothGatt gatt,
-                        BluetoothGattCharacteristic characteristic) {
+                                                    BluetoothGattCharacteristic characteristic) {
                     broadcastUpdate(ConnectAction.ACTION_RECEIVER_DATA, characteristic);
                 }
 
                 @Override
                 public void onCharacteristicWrite(BluetoothGatt gatt,
-                        BluetoothGattCharacteristic characteristic, int status) {
+                                                  BluetoothGattCharacteristic characteristic, int status) {
                     // TODO Auto-generated method stub
                     Log.d(TAG, "发送回调  " + status + " ");
                     super.onCharacteristicWrite(gatt, characteristic, status);
@@ -172,7 +172,7 @@ public class BluetoothLeService extends Service {
     }
 
     private void broadcastUpdate(final String action,
-            final BluetoothGattCharacteristic characteristic) {
+                                 final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
 
         // This is special handling for the Heart Rate Measurement profile. Data
@@ -412,10 +412,10 @@ public class BluetoothLeService extends Service {
      * Enables or disables notification on a give characteristic.
      *
      * @param characteristic Characteristic to act on.
-     * @param enabled If true, enable notification. False otherwise.
+     * @param enabled        If true, enable notification. False otherwise.
      */
     boolean setCharacteristicNotification(BluetoothGatt mBluetoothGatt,
-            BluetoothGattCharacteristic characteristic, boolean enabled) {
+                                          BluetoothGattCharacteristic characteristic, boolean enabled) {
         //BluetoothGatt mBluetoothGatt = null;
         //mBluetoothGatt = getGatt(gattMaps, address);
         if (mBluetoothGatt != null) {
@@ -425,17 +425,31 @@ public class BluetoothLeService extends Service {
             }
             boolean isEnable =
                     mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+
             LogUtils.logD(TAG,
-                    characteristic.getUuid().toString());
+                    characteristic.getUuid().toString() + isEnable);
+//            return isEnable && isEnable2;
 
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-            boolean setValue = descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            boolean setValue = false;
+            boolean writeDesc1 = false;
             if (descriptor != null) {
-                boolean writeDesc = mBluetoothGatt.writeDescriptor(descriptor);
-                LogUtils.logD(TAG, characteristic.getUuid().toString() + " setreceiver  " + setValue + " " + writeDesc);
-
-                return setValue && writeDesc;
+                setValue = descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                writeDesc1 = mBluetoothGatt.writeDescriptor(descriptor);
+                LogUtils.logD(TAG, " setreceiver  " + setValue + " " + writeDesc1);
             }
+            return writeDesc1;
+
+//            BluetoothGattDescriptor descriptor2 = characteristic2.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
+//            boolean setValue2 = false;
+//            boolean writeDesc2 = false;
+//            if (descriptor2 != null) {
+//                setValue2 = descriptor2.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+//                writeDesc2 = mBluetoothGatt.writeDescriptor(descriptor2);
+//                LogUtils.logD(TAG,  " setreceiver2  " + setValue + " " + writeDesc2);
+//
+//            }
+//            return writeDesc1 && writeDesc2;
         }
         return false;
     }
@@ -451,7 +465,8 @@ public class BluetoothLeService extends Service {
         synchronized (gattMaps) {
             if (gattMaps.containsKey(address)) {
                 BluetoothGatt mBluetoothGatt = getGatt(gattMaps, address);
-                if (mBluetoothGatt == null) return null;
+                if (mBluetoothGatt == null)
+                    return null;
                 return mBluetoothGatt.getServices();
             }
             return null;
@@ -537,27 +552,40 @@ public class BluetoothLeService extends Service {
     /**
      * 设置回收发的服务
      */
-    void setReceiver(BluetoothGatt mBluetoothGatt) {
+    void setReceiver(final BluetoothGatt mBluetoothGatt) {
         //BluetoothGatt mBluetoothGatt;
         //mBluetoothGatt = getGatt(gattMaps, address);
         if (mBluetoothGatt == null) {
             return;
         }
         BluetoothGattService linkLossService = mBluetoothGatt.getService(RECEIVER_SERVICE);
-        if (linkLossService == null) return;
+        if (linkLossService == null)
+            return;
 
-        BluetoothGattCharacteristic characteristic =
+        final BluetoothGattCharacteristic characteristic =
                 linkLossService.getCharacteristic(RECEIVER_CHARACTERISTIC);
         if (characteristic == null) {
             return;
         }
 
-        BluetoothGattCharacteristic characteristic2 =
+        final BluetoothGattCharacteristic characteristic2 =
                 linkLossService.getCharacteristic(SEND_CHARACTERISTIC_UUID);
 
         //没有设置成功，就重设监听
         boolean notify2 = setCharacteristicNotification(mBluetoothGatt, characteristic2, true);
-        boolean notify1 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
+        //2个监听需要间隔
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                boolean notify1 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
+            }
+        }).start();
+//        boolean notify1 = setCharacteristicNotification(mBluetoothGatt, characteristic, true);
         //if (! (notify1 && notify2)) {
         //    Message msg = mHandler.obtainMessage();
         //    msg.what = handler_set_notify1;
@@ -613,8 +641,8 @@ public class BluetoothLeService extends Service {
         mToast.show();
     }
 
-    static final int handler_set_notify1        = 103;
-    static final int handler_set_notify2        = 103;
+    static final int handler_set_notify1 = 103;
+    static final int handler_set_notify2 = 103;
 
     private static class MyHandler extends Handler {
         private final WeakReference<BluetoothLeService> mActivity;
