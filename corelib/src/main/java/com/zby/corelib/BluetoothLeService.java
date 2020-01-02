@@ -77,6 +77,8 @@ public class BluetoothLeService extends Service {
     private static final UUID RECEIVER_CHARACTERISTIC =
             UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb");
 
+    private BluetoothDevice mBluetoothDevice;
+
     private MyHandler mHandler;
 
     // Implements callback methods for GATT events that the app cares about. For
@@ -98,6 +100,9 @@ public class BluetoothLeService extends Service {
                         // Attempts to discover services after successful connection.
                         LogUtils.logI(TAG,
                                 "Attempting to start service discovery:" + gatt.discoverServices());
+
+                        mHandler.sendEmptyMessageDelayed(handler_read_rssi, 2000);
+
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         // if(!isReconnect) {
                         intentAction = ConnectAction.ACTION_GATT_DISCONNECTED;
@@ -293,6 +298,7 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "Device not found.  Unable to connect.");
             return false;
         }
+        mBluetoothDevice = device;
         BluetoothGatt ga = getGatt(gattMapsConnting, address);
         if (ga != null) {
             ga.disconnect();
@@ -348,6 +354,7 @@ public class BluetoothLeService extends Service {
      * resources are released properly.
      */
     void close(String address) {
+        mHandler.removeCallbacksAndMessages(null);
         BluetoothGatt mBluetoothGatt = getGatt(gattMaps, address);
         if (mBluetoothGatt != null) {
             gattMaps.remove(address);
@@ -365,6 +372,7 @@ public class BluetoothLeService extends Service {
     }
 
     void closeAll() {
+        mHandler.removeMessages(handler_read_rssi);
         synchronized (gattMapsConnting) {
             for (String key : gattMapsConnting.keySet()) {
                 BluetoothGatt gatt = gattMapsConnting.get(key);
@@ -545,6 +553,13 @@ public class BluetoothLeService extends Service {
     //    return status;
     //}
 
+    public int getConnectStatus() {
+        if (mBluetoothDevice == null) {
+            return 0;
+        }
+        return mBluetoothManager.getConnectionState(mBluetoothDevice, BluetoothProfile.GATT);
+    }
+
     private void showMessage(String msg) {
         Log.e(TAG, msg);
     }
@@ -643,6 +658,8 @@ public class BluetoothLeService extends Service {
 
     static final int handler_set_notify1 = 103;
     static final int handler_set_notify2 = 103;
+    static final int handler_read_rssi = 101;
+
 
     private static class MyHandler extends Handler {
         private final WeakReference<BluetoothLeService> mActivity;
@@ -661,6 +678,10 @@ public class BluetoothLeService extends Service {
                 BluetoothGatt gatt;
                 String address;
                 switch (msg.what) {
+                    case BluetoothLeService.handler_read_rssi:
+                        LogUtils.logD(TAG, "query connect "+service.getConnectStatus());
+                        sendEmptyMessageDelayed(handler_read_rssi, 2000);
+                        break;
 
                     case BluetoothLeService.handler_set_notify1:
                         address = (String) msg.obj;

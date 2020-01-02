@@ -65,33 +65,10 @@ public class DeviceListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
         ButterKnife.bind(this);
-
+        BleManager.getInstance().bluetoothEnable();
         initViews();
 
-        BleManager.getInstance().bluetoothEnable();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //6.0蓝牙搜索需要 location权限
-            new RxPermissions(this)
-                    .request(Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean aBoolean) throws Exception {
-                    if (aBoolean) {
-                        BleManager.getInstance().startScan(true);
-                        mTvConnect.setVisibility(View.GONE);
-                        mProgressBar.setVisibility(View.VISIBLE);
-                    } else {
-                        ToastUtils.toast(DeviceListActivity.this, "请打开蓝牙、定位权限");
-                    }
-                }
-            });
-        } else {
-            BleManager.getInstance().startScan(true);
-            mTvConnect.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
+
     }
 
     private void initViews() {
@@ -122,7 +99,7 @@ public class DeviceListActivity extends AppCompatActivity {
     BleManager.OnScanDeviceListener mListener = new BleManager.OnScanDeviceListener() {
         @Override
         public synchronized void onDeviceFound(DeviceBean db) {
-            if (db.getName() == null || (!AppConstants.BLUE_NAME.equals(db.getName().toLowerCase().trim()))) {
+            if (db.getName() == null) {
                 return;
             }
             for (int i = 0; i < mAdapter.getData().size(); i++) {
@@ -171,8 +148,31 @@ public class DeviceListActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mTvConnect.setVisibility(View.VISIBLE);
-        mProgressBar.setVisibility(View.GONE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //6.0蓝牙搜索需要 location权限
+            new RxPermissions(this)
+                    .request(Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean aBoolean) throws Exception {
+                    if (aBoolean) {
+                        BleManager.getInstance().startScan(true);
+                        mTvConnect.setVisibility(View.GONE);
+                        mProgressBar.setVisibility(View.VISIBLE);
+                    } else {
+                        ToastUtils.toast(DeviceListActivity.this, "请打开蓝牙、定位权限");
+                    }
+                }
+            });
+        } else {
+            BleManager.getInstance().startScan(true);
+            mTvConnect.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
         BleManager.getInstance().addOnScanDeviceListener(mListener);
     }
 

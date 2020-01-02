@@ -103,7 +103,7 @@ public class DeviceDetailActivity extends AppCompatActivity {
                     if (mBeepManager == null) {
                         mBeepManager = new BeepManager(DeviceDetailActivity.this);
                     }
-                    mBeepManager.vibrateOne();
+                    mBeepManager.vibratorOnce();
                 } else {
                     mHandler.removeMessages(handle_alert);
                 }
