@@ -511,6 +511,47 @@ public class BluetoothLeService extends Service {
         return status;
     }
 
+    boolean writeLlsAlertLevel(String address, byte[] bb, boolean isNoResponse) {
+        BluetoothGatt mBluetoothGatt;
+        BluetoothGattService linkLossService;
+        synchronized (gattMaps) {
+            if (!gattMaps.containsKey(address)) {
+                Log.e(TAG, "gatt is null " + address + " ");
+                return false;
+            }
+            mBluetoothGatt = getGatt(gattMaps, address);
+            linkLossService = mBluetoothGatt.getService(SEND_SERVIE_UUID);
+        }
+        if (linkLossService == null) {
+            showMessage("link loss Alert service not found!" + mBluetoothGatt.discoverServices());
+            // showToast("没有服务");
+            return false;
+        }
+
+        boolean status = false;
+        if (alertLevel == null) {
+            alertLevel = linkLossService.getCharacteristic(SEND_CHARACTERISTIC_UUID);
+            if (alertLevel == null) {
+                showMessage("link loss Alert Level charateristic not found!");
+                // showToast("没有特征");
+                return false;
+            }
+            int storedLevel = alertLevel.getWriteType();
+            Log.d(TAG, "storedLevel() - storedLevel=" + storedLevel);
+            if (isNoResponse) {
+                alertLevel.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+            } else {
+                alertLevel.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+            }
+        }
+
+        // enableBattNoti(iDevice);
+        alertLevel.setValue(bb);
+        status = mBluetoothGatt.writeCharacteristic(alertLevel);
+        LogUtils.logV("tag_send", "发送  " + status + " " + MyHexUtils.buffer2String(bb));
+        return status;
+    }
+
     //public boolean writeLlsAlertLevelWait(String address, byte[] bb) {
     //    if (!gattMaps.containsKey(address)) {
     //        Log.e(TAG, "gatt is null " + address);

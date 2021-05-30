@@ -204,11 +204,11 @@ public class BleManager {
         @Override
         public void onLeScan(BluetoothDevice arg0, int arg1, byte[] arg2) {
             Log.d(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
-            if (TextUtils.isEmpty(arg0.getName()) || !arg0.getName()
-                    .toLowerCase()
-                    .startsWith("un")) {
-                return;
-            }
+            //if (TextUtils.isEmpty(arg0.getName()) || !arg0.getName()
+            //        .toLowerCase()
+            //        .startsWith("un")) {
+            //    return;
+            //}
             // TODO Auto-generated method stub
             //if (mMacMap.containsKey(arg0.getAddress())) {
             //    //避免一次搜索， 同一个设备多次回调
@@ -297,8 +297,8 @@ public class BleManager {
                 byte[] buffer = intent.getByteArrayExtra(ConnectAction.BROADCAST_DATA_value);
                 LogUtils.logV("bleManager", "接受数据:" + MyHexUtils.buffer2String(buffer));
                 if (mDb != null) {
-                    mCmdProcess.cleanCache();
-                    mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
+                    //mCmdProcess.cleanCache();
+                    //mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
                     if (mDeviceUpdateListener != null) {
                         mDeviceUpdateListener.onDataUpdate(mDb);
                     }
@@ -386,6 +386,7 @@ public class BleManager {
          * deviceBean data change
          */
         void onDataUpdate(DeviceBean db);
+        void onData(byte[] buff);
     }
 
     public void addOnDeviceUpdateListener(OnDeviceUpdateListener listener) {

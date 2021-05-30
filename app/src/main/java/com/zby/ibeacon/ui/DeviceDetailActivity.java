@@ -13,6 +13,9 @@ import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
 
+/**
+ * 锁的 sdk demo详情页
+ */
 public class DeviceDetailActivity extends AppCompatActivity {
 
     private DeviceBean db;
@@ -32,6 +35,11 @@ public class DeviceDetailActivity extends AppCompatActivity {
             @Override
             public void onDataUpdate(DeviceBean db) {
                 mTvDevice.setText(getDevcieJson());
+            }
+
+            @Override
+            public void onData(byte[] buff) {
+
             }
         });
     }

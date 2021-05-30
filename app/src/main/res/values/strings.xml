@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LockDemo</string>
+    <string name="app_name">Demo</string>
     <string name="label_set_name">设置名字</string>
     <string name="label_set_major">设置major</string>
     <string name="label_set_uuid">设置uuid</string>

@@ -20,7 +20,7 @@ public class DeviceBean {
 
     String cacheKey;
 
-    DeviceBean() {
+    public DeviceBean() {
     }
 
     /**
@@ -135,4 +135,12 @@ public class DeviceBean {
         this.key = key;
     }
 
+
+    public void sendCmdNoResponse(byte[] bytes) {
+        BleManager.getInstance().mInterface.write(bytes, true);
+    }
+
+    public void sendCmd(byte[] startOtaEnd) {
+        BleManager.getInstance().mInterface.write(startOtaEnd, false);
+    }
 }

@@ -23,6 +23,7 @@ import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
+import com.zby.ibeacon.ui.ota.DeviceDetailOtaActivity;
 import java.util.ArrayList;
 
 public class DeviceListActivity extends AppCompatActivity {
@@ -48,6 +49,10 @@ public class DeviceListActivity extends AppCompatActivity {
         } else {
             mRefreshLayout.autoRefresh();
         }
+
+        // TODO: 2021/5/29 测试
+        //startActivity(new Intent(DeviceListActivity.this, DeviceDetailOtaActivity.class));
+
     }
 
     private void initViews() {
@@ -102,10 +107,10 @@ public class DeviceListActivity extends AppCompatActivity {
             @Override
             public void onLinked(final DeviceBean db) {
                 AppApplication.sDeviceBean = db;
-                startActivity(new Intent(DeviceListActivity.this, DeviceDetailActivity.class));
+                startActivity(new Intent(DeviceListActivity.this, DeviceDetailOtaActivity.class));
                 //!!!!!  根据当前硬件 加密情况， 设置软件 key 一致， 这样发下去的协议，硬件才能识别
                 //db.setKey(BleManager.DEFAULT_KEY);
-                db.sendReadStatus();
+                //db.sendReadStatus();
 
             }
 

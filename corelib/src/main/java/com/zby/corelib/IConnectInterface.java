@@ -22,6 +22,9 @@ interface IConnectInterface {
 	 * @param buffer
 	 */
 	boolean write(byte[] buffer);
+
+	boolean write(byte[] buffer, boolean isNoResponse);
+
 	/**
 	 * 将命令生成协议后发送
 	 * @param buffer

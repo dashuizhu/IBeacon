@@ -45,6 +45,15 @@ class BleImpl implements IConnectInterface {
     }
 
     @Override
+    public boolean write(byte[] buffer, boolean isNoResponse) {
+        if (buffer == null) {
+            return false;
+        }
+
+        return mService.writeLlsAlertLevel(mDeviceAddress, buffer, isNoResponse);
+    }
+
+    @Override
     public boolean writeAgreement(byte[] buffer, String encryptKey) {
         //需要对数据进行abs 128加密
         buffer = CmdEncrypt.sendMessage(buffer);
