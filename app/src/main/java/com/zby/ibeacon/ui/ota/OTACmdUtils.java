@@ -1,6 +1,6 @@
 package com.zby.ibeacon.ui.ota;
 
-import android.util.Log;
+import com.zby.ibeacon.utils.AppConstants;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -32,25 +32,34 @@ public class OTACmdUtils {
             @Override
             public void subscribe(ObservableEmitter<byte[]> emitter) throws Exception {
                 byte[] bu;
-                int cout = buff.length / 16;
+                int cout = buff.length / AppConstants.PACKAGE_DATA;
+                int val = buff.length% AppConstants.PACKAGE_DATA;
+                boolean hasVal = val > 0;
+                if (hasVal) {
+                    cout += 1;
+                }
+
                 byte[] data;
                 for (int i = 0; i < cout; i++) {
-                    bu = new byte[18];
+                    // TODO: 2021/6/7
+                    bu = new byte[20];
                     //最后一包，内容不够，填充FF
                     if (i == (cout -1)) {
-                        for (int j=0; j<bu.length;j++) {
+                        for (int j=0; j < bu.length;j++) {
                             bu[j] = (byte) 0xFF;
                         }
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, 0, hasVal ? val : AppConstants.PACKAGE_DATA);
+
+                    } else {
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, 0, AppConstants.PACKAGE_DATA);
                     }
 
-                    bu[0] = (byte) (i >> 8);
+                    bu[0] = (byte) (i / 256);
                     bu[1] = (byte) (i % 256);
 
-                    System.arraycopy(buff, i * 16, bu, 2, 16);
-                    data = Crc16Util.getData(bu);
-                    emitter.onNext(data);
+                    emitter.onNext(bu);
                 }
-                Thread.sleep(2000);
+                Thread.sleep(1500);
                 emitter.onComplete();
             }
         }).doOnNext(new Consumer<byte[]>() {

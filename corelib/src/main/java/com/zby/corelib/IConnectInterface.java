@@ -53,4 +53,6 @@ interface IConnectInterface {
 
 	//void setCmdParse(ICmdParseInterface cmdParse);
 
+	void requestConnectionPriority();
+
 }

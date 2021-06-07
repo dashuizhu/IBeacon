@@ -12,6 +12,7 @@ import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
+import com.zby.ibeacon.utils.AppConstants;
 
 /**
  * 锁的 sdk demo详情页

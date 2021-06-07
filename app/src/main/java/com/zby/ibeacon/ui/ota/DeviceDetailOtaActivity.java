@@ -16,8 +16,10 @@ import android.widget.Toast;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
+import com.zby.corelib.LogUtils;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
+import com.zby.ibeacon.utils.AppConstants;
 import com.zby.ibeacon.utils.ToastUtils;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -37,10 +39,10 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
     private TextView   mTvDevice;
     private TextView   mTvOtaPath;
     private EditText   mEtDuration;
-    private Button mBtnOta;
+    private Button     mBtnOta;
 
-    private Uri mOtaUri;
-    private int mOtaDataDuration;
+    private Uri  mOtaUri;
+    private int  mOtaDataDuration;
     private long mTotalData;
     private long mNowData;
 
@@ -51,7 +53,12 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_detail_ota);
-        db = AppApplication.sDeviceBean;
+
+        if (AppConstants.isDemo) {
+            db = new DeviceBean();
+        } else {
+            db = AppApplication.sDeviceBean;
+        }
         mTvDevice = findViewById(R.id.tv_device);
         mTvOtaPath = findViewById(R.id.tv_otapath);
         mEtDuration = findViewById(R.id.et_duration);
@@ -65,30 +72,34 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
             @Override
             public void onData(byte[] buff) {
                 //开始升级ota应答
-                if (buff[0] == (byte)0xFF && buff[1] == (byte)0x01) {
+                if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x01) {
+                    disDispoable(mStartDis);
                     sendOtaData();
                 }
             }
         });
     }
 
-
     public void clickSelectOtaPath(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //6.0系统蓝牙搜索需要 location权限
-            Disposable dis = new RxPermissions(this).request(Manifest.permission.READ_EXTERNAL_STORAGE).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean aBoolean) throws Exception {
-                     if (aBoolean) {
-                         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                         intent.addCategory(Intent.CATEGORY_OPENABLE);
-                         intent.setType("*/*");
-                         DeviceDetailOtaActivity.this.startActivityForResult(intent, 102);
-                     } else {
-                         ToastUtils.toast("请先允许存储权限");
-                     }
-                }
-            });
+            Disposable dis =
+                    new RxPermissions(this).request(Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .subscribe(new Consumer<Boolean>() {
+                                @Override
+                                public void accept(Boolean aBoolean) throws Exception {
+                                    if (aBoolean) {
+                                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                        intent.setType("*/*");
+                                        DeviceDetailOtaActivity.this.startActivityForResult(intent,
+                                                102);
+                                    } else {
+                                        ToastUtils.toast("请先允许存储权限");
+                                    }
+                                }
+                            });
         }
     }
 
@@ -116,10 +127,8 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-
     /**
      * 开始根据bin uri升级
-     * @param uri
      */
     private void startOta(Uri uri) {
         mOtaDataDuration = 0;
@@ -144,14 +153,16 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
         mStartDis = Observable.timer(10, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
-            @Override
-            public void accept(Long aLong) throws Exception {
-                sendOtaData();
-                ToastUtils.toast("开始升级应答超时");
-                mBtnOta.setText("开始");
-                mBtnOta.setEnabled(true);
-            }
-        });
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        if (AppConstants.isDemo) {
+                            sendOtaData();
+                        }
+                        ToastUtils.toast("开始升级应答超时");
+                        mBtnOta.setText("开始");
+                        mBtnOta.setEnabled(true);
+                    }
+                });
     }
 
     private void sendOtaData() {
@@ -167,16 +178,22 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
             mTotalData = by.length;
             mNowData = 0;
+            db.requestConnectionPriority();
             OTACmdUtils.sendOta(by, mOtaDataDuration).subscribe(new Observer<byte[]>() {
                 @Override
                 public void onSubscribe(Disposable d) {
                     mOtaDis = d;
                 }
 
+                int count =0;
                 @Override
                 public void onNext(byte[] bytes) {
-                    db.sendCmdNoResponse(bytes);
-                    mNowData += 16;
+                    boolean sendSucc = db.sendCmdNoResponse(bytes);
+                    if (sendSucc) {
+                        count += 1;
+                        LogUtils.writeLogToFile("send succ",  + count + " totalsize " + mTotalData);
+                    }
+                    mNowData += AppConstants.PACKAGE_DATA;
 
                     if (mNowData >= mTotalData) {
                         mNowData = mTotalData;
@@ -187,6 +204,8 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 @Override
                 public void onError(Throwable e) {
                     mBtnOta.setEnabled(true);
+                    LogUtils.writeLogToFile("error", e.getMessage());
+                    LogUtils.writeLogToFile("error", e.getCause().getMessage());
                 }
 
                 @Override

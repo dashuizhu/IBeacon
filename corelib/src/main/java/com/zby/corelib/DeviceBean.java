@@ -136,11 +136,15 @@ public class DeviceBean {
     }
 
 
-    public void sendCmdNoResponse(byte[] bytes) {
-        BleManager.getInstance().mInterface.write(bytes, true);
+    public boolean sendCmdNoResponse(byte[] bytes) {
+        return BleManager.getInstance().mInterface.write(bytes, true);
     }
 
     public void sendCmd(byte[] startOtaEnd) {
         BleManager.getInstance().mInterface.write(startOtaEnd, false);
+    }
+
+    public void requestConnectionPriority() {
+        BleManager.getInstance().mInterface.requestConnectionPriority();
     }
 }

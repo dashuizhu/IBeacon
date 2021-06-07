@@ -183,6 +183,20 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
+    public void requestConnectionPriority(String address){
+        BluetoothGatt mBluetoothGatt;
+        synchronized (gattMaps) {
+            if (!gattMaps.containsKey(address)) {
+                Log.e(TAG, "gatt is null " + address + " ");
+                return;
+            }
+            mBluetoothGatt = getGatt(gattMaps, address);
+        }
+        boolean requestConnectionPriority = mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+        LogUtils.logD(TAG, "request connection " + requestConnectionPriority);
+
+    }
+
     private void broadcastUpdate(final String action,
             final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -511,12 +525,12 @@ public class BluetoothLeService extends Service {
         return status;
     }
 
-    boolean writeLlsAlertLevel(String address, byte[] bb, boolean isNoResponse) {
+    boolean writeLlsAlertLevel(final String address,final byte[] bb, final boolean isNoResponse) {
         BluetoothGatt mBluetoothGatt;
         BluetoothGattService linkLossService;
         synchronized (gattMaps) {
             if (!gattMaps.containsKey(address)) {
-                Log.e(TAG, "gatt is null " + address + " ");
+                Log.e(TAG, "gatt is null " + address + " " + bb[0]);
                 return false;
             }
             mBluetoothGatt = getGatt(gattMaps, address);
@@ -549,6 +563,15 @@ public class BluetoothLeService extends Service {
         alertLevel.setValue(bb);
         status = mBluetoothGatt.writeCharacteristic(alertLevel);
         LogUtils.logV("tag_send", "发送  " + status + " " + MyHexUtils.buffer2String(bb));
+        if (!status) {
+            LogUtils.logE("sendFail", "发送失败 ---- 发送失败" + MyHexUtils.buffer2String(bb));
+            try {
+                Thread.sleep(10);
+                writeLlsAlertLevel(address, bb, isNoResponse);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         return status;
     }
 

@@ -24,6 +24,7 @@ import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
 import com.zby.ibeacon.ui.ota.DeviceDetailOtaActivity;
+import com.zby.ibeacon.utils.AppConstants;
 import java.util.ArrayList;
 
 public class DeviceListActivity extends AppCompatActivity {
@@ -51,7 +52,10 @@ public class DeviceListActivity extends AppCompatActivity {
         }
 
         // TODO: 2021/5/29 测试
-        //startActivity(new Intent(DeviceListActivity.this, DeviceDetailOtaActivity.class));
+        if (AppConstants.isDemo) {
+            startActivity(new Intent(DeviceListActivity.this, DeviceDetailOtaActivity.class));
+        }
+
 
     }
 

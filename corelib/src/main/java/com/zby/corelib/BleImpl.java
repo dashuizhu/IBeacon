@@ -109,4 +109,11 @@ class BleImpl implements IConnectInterface {
         return type_ble;
     }
 
+    @Override
+    public void requestConnectionPriority() {
+        if (mService != null) {
+            mService.requestConnectionPriority(mDeviceAddress);
+        }
+
+    }
 }

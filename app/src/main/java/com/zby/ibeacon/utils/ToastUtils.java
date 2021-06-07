@@ -42,7 +42,7 @@ public class ToastUtils extends Toast {
                 mToast.cancel();
             }
             //小米手机上， 要先设置为null 再setText， 不然会自动添加 应用名:str
-            mToast = Toast.makeText(AppApplication.getContext(), null, Toast.LENGTH_LONG);
+            mToast = Toast.makeText(AppApplication.getContext(), "", Toast.LENGTH_LONG);
             mToast.setText(str);
             mToast.show();
         } else {
