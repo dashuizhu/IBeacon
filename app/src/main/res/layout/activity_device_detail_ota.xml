@@ -14,6 +14,15 @@
         android:background="@drawable/layout_selector"
         android:padding="@dimen/activity_horizontal_margin" />
 
+    <CheckBox
+        android:id="@+id/cb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是否加密"
+        android:checked="true"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/activity_horizontal_margin"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

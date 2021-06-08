@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.corelib.LogUtils;
+import com.zby.corelib.MyHexUtils;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.utils.AppConstants;
@@ -40,6 +43,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
     private TextView   mTvOtaPath;
     private EditText   mEtDuration;
     private Button     mBtnOta;
+    private CheckBox   mCb;
 
     private Uri  mOtaUri;
     private int  mOtaDataDuration;
@@ -49,6 +53,8 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
     private Disposable mStartDis;
     private Disposable mOtaDis;
 
+    private boolean isOtaIng;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +62,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
         if (AppConstants.isDemo) {
             db = new DeviceBean();
+            BleManager.getInstance().connect(db);
         } else {
             db = AppApplication.sDeviceBean;
         }
@@ -63,6 +70,15 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
         mTvOtaPath = findViewById(R.id.tv_otapath);
         mEtDuration = findViewById(R.id.et_duration);
         mBtnOta = findViewById(R.id.btn_ota);
+        mCb = findViewById(R.id.cb);
+
+        mCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppConstants.setEncrypt(isChecked);
+            }
+        });
+
         BleManager.getInstance().addOnDeviceUpdateListener(new BleManager.OnDeviceUpdateListener() {
             @Override
             public void onDataUpdate(DeviceBean db) {
@@ -71,6 +87,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
             @Override
             public void onData(byte[] buff) {
+
                 //开始升级ota应答
                 if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x01) {
                     disDispoable(mStartDis);
@@ -150,14 +167,22 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
         mBtnOta.setEnabled(false);
         db.sendCmd(OTACmdUtils.startOta());
 
-        mStartDis = Observable.timer(10, TimeUnit.SECONDS)
+        if (AppConstants.isDemo) {
+            Intent intent = new Intent("com.wt.isensor.broadcast");
+            byte[] data = new byte[2];
+            data[0] = (byte) 0xFF;
+            data[1] = (byte) 0x01;
+            intent.putExtra("data", data);
+            intent.setPackage(getPackageName());
+            sendBroadcast(intent);
+        }
+
+        mStartDis = Observable.timer(8, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        if (AppConstants.isDemo) {
-                            sendOtaData();
-                        }
+
                         ToastUtils.toast("开始升级应答超时");
                         mBtnOta.setText("开始");
                         mBtnOta.setEnabled(true);
@@ -179,6 +204,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
             mTotalData = by.length;
             mNowData = 0;
             db.requestConnectionPriority();
+            isOtaIng = true;
             OTACmdUtils.sendOta(by, mOtaDataDuration).subscribe(new Observer<byte[]>() {
                 @Override
                 public void onSubscribe(Disposable d) {
@@ -193,6 +219,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                         count += 1;
                         LogUtils.writeLogToFile("send succ",  + count + " totalsize " + mTotalData);
                     }
+
                     mNowData += AppConstants.PACKAGE_DATA;
 
                     if (mNowData >= mTotalData) {
@@ -204,6 +231,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 @Override
                 public void onError(Throwable e) {
                     mBtnOta.setEnabled(true);
+                    isOtaIng = false;
                     LogUtils.writeLogToFile("error", e.getMessage());
                     LogUtils.writeLogToFile("error", e.getCause().getMessage());
                 }
@@ -213,6 +241,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                     mBtnOta.setEnabled(true);
                     db.sendCmd(OTACmdUtils.startOtaEnd());
                     mBtnOta.setEnabled(true);
+                    isOtaIng = false;
                     mBtnOta.setText("完成");
                 }
             });

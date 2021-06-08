@@ -300,7 +300,7 @@ public class BleManager {
                     //mCmdProcess.cleanCache();
                     //mCmdProcess.processDataCommand(mDb, buffer, buffer.length);
                     if (mDeviceUpdateListener != null) {
-                        mDeviceUpdateListener.onDataUpdate(mDb);
+                        mDeviceUpdateListener.onData(buffer);
                     }
                 }
             }

@@ -112,7 +112,7 @@ public class BluetoothLeService extends Service {
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                     //List<BluetoothGattService> lists = gatt.getServices();
-                    Log.w(TAG, "onServicesDiscovered received: " + status + " " + gatt.getServices().size());
+                    LogUtils.logD(TAG, "onServicesDiscovered received: " + status + " " + gatt.getServices().size());
                     //for (BluetoothGattService ser : lists) {
                     //    Log.w(TAG, " service: " + ser.getUuid().toString());
                     //}
@@ -564,10 +564,10 @@ public class BluetoothLeService extends Service {
         status = mBluetoothGatt.writeCharacteristic(alertLevel);
         LogUtils.logV("tag_send", "发送  " + status + " " + MyHexUtils.buffer2String(bb));
         if (!status) {
-            LogUtils.logE("sendFail", "发送失败 ---- 发送失败" + MyHexUtils.buffer2String(bb));
             try {
                 Thread.sleep(10);
-                writeLlsAlertLevel(address, bb, isNoResponse);
+                LogUtils.logE("sendFail", "发送失败 ---- 重发" + MyHexUtils.buffer2String(bb));
+                status = mBluetoothGatt.writeCharacteristic(alertLevel);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

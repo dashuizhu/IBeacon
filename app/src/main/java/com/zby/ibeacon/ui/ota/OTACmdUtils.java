@@ -40,24 +40,37 @@ public class OTACmdUtils {
                 }
 
                 byte[] data;
+
+                boolean isLast;
+                int startIndex = AppConstants.isEncrypt ? 2 : 0;
+
                 for (int i = 0; i < cout; i++) {
-                    // TODO: 2021/6/7
-                    bu = new byte[20];
+
+                    isLast = (i == cout - 1);
+                    //加密 ，2个字节序号 16字节内容， 2个字节加密
+                    //不加密，就直接 20个字节全内容
+                    bu = new byte[AppConstants.isEncrypt ? 18 : 20];
+
                     //最后一包，内容不够，填充FF
-                    if (i == (cout -1)) {
-                        for (int j=0; j < bu.length;j++) {
+                    if (isLast) {
+                        for (int j = 0; j < bu.length; j++) {
                             bu[j] = (byte) 0xFF;
                         }
-                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, 0, hasVal ? val : AppConstants.PACKAGE_DATA);
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, startIndex, hasVal ? val : AppConstants.PACKAGE_DATA);
 
                     } else {
-                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, 0, AppConstants.PACKAGE_DATA);
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, startIndex, AppConstants.PACKAGE_DATA);
                     }
 
-                    bu[0] = (byte) (i / 256);
-                    bu[1] = (byte) (i % 256);
+                    if (AppConstants.isEncrypt) {
+                        bu[0] = (byte) (i / 256);
+                        bu[1] = (byte) (i % 256);
+                        data = Crc16Util.getData(bu);
+                        emitter.onNext(data);
+                    } else {
+                        emitter.onNext(bu);
+                    }
 
-                    emitter.onNext(bu);
                 }
                 Thread.sleep(1500);
                 emitter.onComplete();

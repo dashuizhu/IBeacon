@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class MyHexUtils {
+public class MyHexUtils {
 	//static void main(String[] args) {
 	//	String senddata = "A1b2";
 	//	byte[] buffer2 = hexStringToByte(senddata);
