@@ -17,6 +17,7 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.zby.corelib.AppConstants;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.BluetoothLeService;
 import com.zby.corelib.DeviceBean;
@@ -24,7 +25,6 @@ import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
 import com.zby.ibeacon.ui.ota.DeviceDetailOtaActivity;
-import com.zby.ibeacon.utils.AppConstants;
 import java.util.ArrayList;
 
 public class DeviceListActivity extends AppCompatActivity {

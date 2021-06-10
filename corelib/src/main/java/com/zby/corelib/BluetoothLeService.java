@@ -33,6 +33,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+import com.zby.corelib.utils.Crc16Util;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +74,11 @@ public class BluetoothLeService extends Service {
             UUID.fromString("0000ff50-0000-1000-8000-00805f9b34fb");
     private static final UUID SEND_CHARACTERISTIC_UUID =
             UUID.fromString("0000ff52-0000-1000-8000-00805f9b34fb");
+//定时开关
+//    private static final UUID SEND_SERVIE_UUID         =
+//            UUID.fromString("000051b0-0000-1000-8000-00805f9b34fb");
+//    private static final UUID SEND_CHARACTERISTIC_UUID =
+//            UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb");
 
     private static final UUID RECEIVER_SERVICE        =
             UUID.fromString("0000ff50-0000-1000-8000-00805f9b34fb");
@@ -563,11 +575,11 @@ public class BluetoothLeService extends Service {
         alertLevel.setValue(bb);
         status = mBluetoothGatt.writeCharacteristic(alertLevel);
         LogUtils.logV("tag_send", "发送  " + status + " " + MyHexUtils.buffer2String(bb));
-        if (!status) {
+        if (!isNoResponse && !status) {
             try {
-                Thread.sleep(10);
-                LogUtils.logE("sendFail", "发送失败 ---- 重发" + MyHexUtils.buffer2String(bb));
+                Thread.sleep(100);
                 status = mBluetoothGatt.writeCharacteristic(alertLevel);
+                LogUtils.logE("sendFail", "发送失败 ---- 重发" + status + MyHexUtils.buffer2String(bb));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -677,5 +689,77 @@ public class BluetoothLeService extends Service {
         mToast.setText(str);
         mToast.setDuration(Toast.LENGTH_LONG);
         mToast.show();
+    }
+
+    public Observable<byte[]> startOta(final String address, final byte[] buff, final int delay) {
+        Observable<byte[]> observable = Observable.create(new ObservableOnSubscribe<byte[]>() {
+            @Override
+            public void subscribe(ObservableEmitter<byte[]> emitter) throws Exception {
+
+                byte[] bu;
+                int cout = buff.length / AppConstants.PACKAGE_DATA;
+                int val = buff.length% AppConstants.PACKAGE_DATA;
+                boolean hasVal = val > 0;
+                if (hasVal) {
+                    cout += 1;
+                }
+
+                byte[] data;
+
+                boolean isLast;
+                int startIndex = AppConstants.isEncrypt ? 2 : 0;
+
+                int i = 0;
+                int errorCount = 0;
+                while (i < cout) {
+
+                    if (errorCount > 20) {
+                        throw new Exception("error");
+                    }
+
+                    isLast = (i == cout - 1);
+                    //加密 ，2个字节序号 16字节内容， 2个字节加密
+                    //不加密，就直接 20个字节全内容
+                    bu = new byte[AppConstants.isEncrypt ? 18 : 20];
+
+                    //最后一包，内容不够，填充FF
+                    if (isLast) {
+                        for (int j = 0; j < bu.length; j++) {
+                            bu[j] = (byte) 0xFF;
+                        }
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, startIndex, hasVal ? val : AppConstants.PACKAGE_DATA);
+
+                    } else {
+                        System.arraycopy(buff, i * AppConstants.PACKAGE_DATA, bu, startIndex, AppConstants.PACKAGE_DATA);
+                    }
+
+
+
+                    if (AppConstants.isEncrypt) {
+                        bu[0] = (byte) (i / 256);
+                        bu[1] = (byte) (i % 256);
+                        data = Crc16Util.getData(bu);
+
+                    } else {
+                        data = bu;
+                    }
+
+                    if (writeLlsAlertLevel(address, data, true)) {
+                        i++;
+                        errorCount = 0;
+                        emitter.onNext(bu);
+                        Thread.sleep(delay);
+                    } else {
+                        errorCount ++;
+                        Thread.sleep((delay/2));
+                    }
+
+                }
+                Thread.sleep(200);
+                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+        return observable;
     }
 }

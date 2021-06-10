@@ -1,4 +1,4 @@
-package com.zby.ibeacon.utils;
+package com.zby.corelib;
 
 /**
  * @author zhuj 2021/6/7 10:32 PM.

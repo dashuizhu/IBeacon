@@ -2,6 +2,7 @@ package com.zby.corelib;
 
 import android.text.TextUtils;
 import android.util.Log;
+import io.reactivex.Observable;
 
 class BleImpl implements IConnectInterface {
 
@@ -115,5 +116,13 @@ class BleImpl implements IConnectInterface {
             mService.requestConnectionPriority(mDeviceAddress);
         }
 
+    }
+
+    @Override
+    public Observable<byte[]> startOta(byte[] buff, int nextTime) {
+        if (mService != null) {
+            return mService.startOta(mDeviceAddress, buff, nextTime);
+        }
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package com.zby.corelib;
 
 import android.text.TextUtils;
+import io.reactivex.Observable;
 
 /**
  * DeviceBean
@@ -146,5 +147,9 @@ public class DeviceBean {
 
     public void requestConnectionPriority() {
         BleManager.getInstance().mInterface.requestConnectionPriority();
+    }
+
+    public Observable<byte[]> startOta(byte[] by, int otaDataDuration) {
+        return BleManager.getInstance().mInterface.startOta(by, otaDataDuration);
     }
 }

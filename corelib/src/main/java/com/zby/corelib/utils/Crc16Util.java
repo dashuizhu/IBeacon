@@ -1,4 +1,4 @@
-package com.zby.ibeacon.ui.ota;
+package com.zby.corelib.utils;
 
 /**
  * 基于Modbus CRC16的校验算法工具类

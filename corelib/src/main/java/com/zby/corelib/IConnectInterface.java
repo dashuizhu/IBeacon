@@ -1,5 +1,6 @@
 package com.zby.corelib;
 
+import io.reactivex.Observable;
 
 interface IConnectInterface {
 
@@ -55,4 +56,5 @@ interface IConnectInterface {
 
 	void requestConnectionPriority();
 
+	Observable<byte[]> startOta(byte[] buff, int nextTime);
 }

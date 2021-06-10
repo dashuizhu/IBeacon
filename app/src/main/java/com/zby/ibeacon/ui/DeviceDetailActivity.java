@@ -3,7 +3,6 @@ package com.zby.ibeacon.ui;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,7 +11,6 @@ import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
-import com.zby.ibeacon.utils.AppConstants;
 
 /**
  * 锁的 sdk demo详情页

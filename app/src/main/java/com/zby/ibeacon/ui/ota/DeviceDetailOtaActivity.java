@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -16,13 +15,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.zby.corelib.AppConstants;
 import com.zby.corelib.BleManager;
 import com.zby.corelib.DeviceBean;
 import com.zby.corelib.LogUtils;
-import com.zby.corelib.MyHexUtils;
 import com.zby.ibeacon.AppApplication;
 import com.zby.ibeacon.R;
-import com.zby.ibeacon.utils.AppConstants;
 import com.zby.ibeacon.utils.ToastUtils;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -92,6 +90,8 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x01) {
                     disDispoable(mStartDis);
                     sendOtaData();
+                } else if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x02) {
+
                 }
             }
         });
@@ -117,6 +117,13 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                                     }
                                 }
                             });
+        } else {
+
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            DeviceDetailOtaActivity.this.startActivityForResult(intent,
+                    102);
         }
     }
 
@@ -182,7 +189,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-
+                        //sendOtaData();
                         ToastUtils.toast("开始升级应答超时");
                         mBtnOta.setText("开始");
                         mBtnOta.setEnabled(true);
@@ -191,6 +198,9 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
     }
 
     private void sendOtaData() {
+        if (isOtaIng) {
+            return;
+        }
         InputStream is = null;
         try {
             is = getContentResolver().openInputStream(mOtaUri);
@@ -205,7 +215,11 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
             mNowData = 0;
             db.requestConnectionPriority();
             isOtaIng = true;
-            OTACmdUtils.sendOta(by, mOtaDataDuration).subscribe(new Observer<byte[]>() {
+
+
+
+            //OTACmdUtils.sendOta(by, mOtaDataDuration)
+            db.startOta(by, mOtaDataDuration).subscribe(new Observer<byte[]>() {
                 @Override
                 public void onSubscribe(Disposable d) {
                     mOtaDis = d;
@@ -214,11 +228,11 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 int count =0;
                 @Override
                 public void onNext(byte[] bytes) {
-                    boolean sendSucc = db.sendCmdNoResponse(bytes);
-                    if (sendSucc) {
+                    //boolean sendSucc = db.sendCmdNoResponse(bytes);
+                    //if (sendSucc) {
                         count += 1;
                         LogUtils.writeLogToFile("send succ",  + count + " totalsize " + mTotalData);
-                    }
+                    //}
 
                     mNowData += AppConstants.PACKAGE_DATA;
 
@@ -232,8 +246,8 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                 public void onError(Throwable e) {
                     mBtnOta.setEnabled(true);
                     isOtaIng = false;
+                    mBtnOta.setText("升级失败");
                     LogUtils.writeLogToFile("error", e.getMessage());
-                    LogUtils.writeLogToFile("error", e.getCause().getMessage());
                 }
 
                 @Override
