@@ -60,6 +60,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
         if (AppConstants.isDemo) {
             db = new DeviceBean();
+            db.setMac("01:23:45:67:89:AB");
             BleManager.getInstance().connect(db);
         } else {
             db = AppApplication.sDeviceBean;
@@ -86,12 +87,21 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
             @Override
             public void onData(byte[] buff) {
 
-                //开始升级ota应答
-                if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x01) {
-                    disDispoable(mStartDis);
-                    sendOtaData();
-                } else if (buff[0] == (byte) 0xFF && buff[1] == (byte) 0x02) {
+                switch (buff[0]) {
+                    case (byte) 0xFF:
+                        if (buff[1] == (byte) 0x01) {
+                            disDispoable(mStartDis);
+                            sendOtaData();
+                        } else if (buff[1] == (byte) 0x02) {
 
+                        }
+                        break;
+                    case 0x55:
+                        ToastUtils.toast("OTA失败");
+                        mBtnOta.setText("OTA失败");
+                        mBtnOta.setEnabled(true);
+                        break;
+                    default:
                 }
             }
         });
@@ -119,7 +129,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                             });
         } else {
 
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("*/*");
             DeviceDetailOtaActivity.this.startActivityForResult(intent,
@@ -172,7 +182,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
         }
         mBtnOta.setText("开始...");
         mBtnOta.setEnabled(false);
-        db.sendCmd(OTACmdUtils.startOta());
+        db.sendCmd(OTACmdUtils.startOta(db.getMac()));
 
         if (AppConstants.isDemo) {
             Intent intent = new Intent("com.wt.isensor.broadcast");
@@ -231,7 +241,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
                     //boolean sendSucc = db.sendCmdNoResponse(bytes);
                     //if (sendSucc) {
                         count += 1;
-                        LogUtils.writeLogToFile("send succ",  + count + " totalsize " + mTotalData);
+                        //LogUtils.writeLogToFile("send succ",  + count + " totalsize " + mTotalData);
                     //}
 
                     mNowData += AppConstants.PACKAGE_DATA;
@@ -244,6 +254,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Throwable e) {
+                    e.printStackTrace();
                     mBtnOta.setEnabled(true);
                     isOtaIng = false;
                     mBtnOta.setText("升级失败");
@@ -252,8 +263,7 @@ public class DeviceDetailOtaActivity extends AppCompatActivity {
 
                 @Override
                 public void onComplete() {
-                    mBtnOta.setEnabled(true);
-                    db.sendCmd(OTACmdUtils.startOtaEnd());
+                    db.sendCmd(OTACmdUtils.startOtaEnd(AppConstants.getPackageMaxIndex(mTotalData)));
                     mBtnOta.setEnabled(true);
                     isOtaIng = false;
                     mBtnOta.setText("完成");

@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:inputType="number"
             android:imeOptions="actionDone"
-            android:text="100"
+            android:text="15"
             android:gravity="center"
             android:padding="@dimen/activity_horizontal_margin" />
 

@@ -14,9 +14,9 @@ android {
     applicationId "com.zby.ibeacon"
     minSdkVersion 19
     targetSdkVersion 28
-    versionCode 3
+    versionCode 4
     signingConfig signingConfigs.signing
-    versionName "1.02"
+    versionName "1.04"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     javaCompileOptions {
       annotationProcessorOptions {

@@ -31,6 +31,10 @@ public class DeviceBean {
         return mac;
     }
 
+    public void setMac(String str) {
+        mac = str;
+    }
+
     /**
      * @return device name
      */

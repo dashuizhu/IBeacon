@@ -15,4 +15,19 @@ public class AppConstants {
         isEncrypt = encrypt;
         PACKAGE_DATA = isEncrypt ? 16 : 20;
     }
+
+    /**
+     * 根据数据包长度 获得数据包最大序号
+     * @param buffLength
+     * @return
+     */
+    public static int getPackageMaxIndex(long buffLength) {
+        long cout = buffLength / AppConstants.PACKAGE_DATA;
+        int val = (int) (buffLength % AppConstants.PACKAGE_DATA);
+        boolean hasVal = val > 0;
+        if (hasVal) {
+            cout += 1;
+        }
+        return (int) cout - 1;
+    }
 }

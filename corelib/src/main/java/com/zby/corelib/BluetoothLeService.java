@@ -698,7 +698,7 @@ public class BluetoothLeService extends Service {
 
                 byte[] bu;
                 int cout = buff.length / AppConstants.PACKAGE_DATA;
-                int val = buff.length% AppConstants.PACKAGE_DATA;
+                int val = buff.length % AppConstants.PACKAGE_DATA;
                 boolean hasVal = val > 0;
                 if (hasVal) {
                     cout += 1;
@@ -711,10 +711,12 @@ public class BluetoothLeService extends Service {
 
                 int i = 0;
                 int errorCount = 0;
+                int totalErrorCount = 0;
+
                 while (i < cout) {
 
-                    if (errorCount > 20) {
-                        throw new Exception("error");
+                    if (errorCount > 30) {
+                        throw new Exception("send fail times more then 30");
                     }
 
                     isLast = (i == cout - 1);
@@ -744,18 +746,21 @@ public class BluetoothLeService extends Service {
                         data = bu;
                     }
 
-                    if (writeLlsAlertLevel(address, data, true)) {
+                    if (AppConstants.isDemo || writeLlsAlertLevel(address, data, true)) {
                         i++;
                         errorCount = 0;
                         emitter.onNext(bu);
                         Thread.sleep(delay);
                     } else {
                         errorCount ++;
+                        totalErrorCount ++;
                         Thread.sleep((delay/2));
                     }
 
                 }
                 Thread.sleep(200);
+                LogUtils.logW(TAG, "OTA数据发送完毕  重发 " + totalErrorCount +" / " + cout);
+
                 emitter.onComplete();
             }
         }).subscribeOn(Schedulers.io())

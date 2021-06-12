@@ -1,30 +1,49 @@
 package com.zby.ibeacon.ui.ota;
 
-import com.zby.corelib.AppConstants;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
+import android.util.Log;
+import com.zby.corelib.LogUtils;
+import com.zby.corelib.MyHexUtils;
+import com.zby.corelib.utils.Crc16Util;
 
 /**
  * @author zhuj 2021/5/29 4:52 PM.
  */
 public class OTACmdUtils {
 
-    public static byte[] startOta() {
-        byte[] buff = new byte[2];
+    public static byte[] startOta(String mac) {
+        byte[] buff = new byte[18];
         buff[0] = (byte) 0xFF;
         buff[1] = (byte) 0x01;
-        return buff;
+        String macAdd = mac.replace(":", "");
+        byte[] macBuff = MyHexUtils.hexStringToByte(macAdd);
+        System.arraycopy(macBuff, 0, buff, 2, macBuff.length);
+
+        //填充剩余内容
+        for (int i = 8; i < buff.length; i++) {
+            buff[i] = (byte) 0xAA;
+        }
+        byte[] data = Crc16Util.getData(buff);
+        LogUtils.writeLogToFile("otaStart", MyHexUtils.buffer2String(data));
+
+        return data;
     }
 
-    public static byte[] startOtaEnd() {
-        byte[] buff = new byte[2];
+    public static byte[] startOtaEnd(int maxCount) {
+        byte[] buff = new byte[18];
         buff[0] = (byte) 0xFF;
         buff[1] = (byte) 0x02;
-        return buff;
+        buff[2] = (byte) (maxCount/ 256);
+        buff[3] = (byte) (maxCount%256);
+        buff[4] = (byte) ~buff[2];
+        buff[5] = (byte) ~buff[3];
+
+        //填充剩余内容
+        for (int i = 6; i < buff.length; i++) {
+            buff[i] = (byte) 0x55;
+        }
+        byte[] data = Crc16Util.getData(buff);
+        LogUtils.writeLogToFile("otaEnd", MyHexUtils.buffer2String(data));
+        return data;
     }
 
     //public static Observable<byte[]> sendOta(final byte[] buff, final int sleepTime) {
