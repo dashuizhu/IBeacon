@@ -11,12 +11,12 @@ android {
     }
   }
   defaultConfig {
-    applicationId "com.zby.ibeacon"
+    applicationId "com.zby.ibeacon.blescan"
     minSdkVersion 19
     targetSdkVersion 28
-    versionCode 4
+    versionCode 1
     signingConfig signingConfigs.signing
-    versionName "1.04"
+    versionName "1.0"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     javaCompileOptions {
       annotationProcessorOptions {

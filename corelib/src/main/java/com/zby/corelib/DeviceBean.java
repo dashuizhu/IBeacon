@@ -21,6 +21,8 @@ public class DeviceBean {
 
     String cacheKey;
 
+    byte[] data;
+
     public DeviceBean() {
     }
 
@@ -155,5 +157,34 @@ public class DeviceBean {
 
     public Observable<byte[]> startOta(byte[] by, int otaDataDuration) {
         return BleManager.getInstance().mInterface.startOta(by, otaDataDuration);
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DeviceBean) {
+            return TextUtils.equals(((DeviceBean) obj).mac.toLowerCase(), this.mac.toLowerCase());
+        }
+        return false;
+    }
+
+    public String getDataString() {
+        if (data == null || data.length < 13) {
+            return "";
+        }
+        byte[] buff1 = new byte[4];
+        System.arraycopy(data, 8, buff1, 0, 4);
+        byte[] buff2 = new byte[2];
+        System.arraycopy(data, 12, buff2, 0, 2);
+        String s1 = MyHexUtils.buffer2String(buff1);
+        String s2 = MyHexUtils.buffer2String(buff2);
+        return  s1 + " crc : " + s2;
     }
 }

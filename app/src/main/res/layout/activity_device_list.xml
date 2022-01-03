@@ -7,6 +7,23 @@
     android:background="@mipmap/logo_bg"
     tools:context=".ui.DeviceListActivity">
 
+
+    <EditText
+        android:id="@+id/et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:padding="16dp"
+        android:hint="过滤的mac"/>
+
+    <Button
+        android:id="@+id/btn_bind"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/divide_line"
+        android:text="绑定"/>
+
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
         android:id="@+id/refreshLayout"
         android:layout_width="match_parent"

@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import com.zby.corelib.utils.Crc16Util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,6 +143,7 @@ public class BleManager {
      * @param isStartScan true startScan, false stop Scan
      */
     public void startScan(boolean isStartScan) {
+        mFilterMacList.clear();
         if (isStartScan) { //开始搜索
             if (scanThread != null) {
                 if (scanThread.isAlive()) {
@@ -199,61 +201,52 @@ public class BleManager {
         }
     };
 
+    private List<String> mFilterMacList = new ArrayList<>();
+
     private BluetoothAdapter.LeScanCallback scanCallBack = new BluetoothAdapter.LeScanCallback() {
 
         @Override
         public void onLeScan(BluetoothDevice arg0, int arg1, byte[] arg2) {
             Log.d(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
-            //if (TextUtils.isEmpty(arg0.getName()) || !arg0.getName()
-            //        .toLowerCase()
-            //        .startsWith("un")) {
-            //    return;
-            //}
-            // TODO Auto-generated method stub
-            //if (mMacMap.containsKey(arg0.getAddress())) {
-            //    //避免一次搜索， 同一个设备多次回调
-            //    long delayTime = System.currentTimeMillis() - mMacMap.get(arg0.getAddress());
-            //    if (delayTime < 500) {
-            //        Log.i(TAG, " filter --- > " + arg0.getAddress());
-            //        return;
-            //    }
-            //}
-            int ele = MyByteUtils.byteToInt(arg2[15]);
-            int onoff = MyByteUtils.byteToInt(arg2[17]);
-            //mMacMap.put(arg0.getAddress(), System.currentTimeMillis());
-            foundDevice(arg0, arg1, ele, onoff == 1);
+            if (mFilterMacList.contains(arg0.getAddress())) {
+                return;
+            }
+            mFilterMacList.add(arg0.getAddress());
+            foundDevice(arg0, arg2);
             //}
         }
     };
 
     /**
      * @param device
-     * @param arg1
+     * @param data
      */
-    private void foundDevice(BluetoothDevice device, int arg1, int ele, boolean onfoo) {
+    private void foundDevice(BluetoothDevice device, byte[] data) {
+        LogUtils.writeLogToFile("foundDevice", "发现设备 " + device.getAddress() + "  " + MyHexUtils.buffer2String(data));
         for (DeviceBean db : mDeviceList) {
             if (db.getMac() == device.getAddress()) {
                 db.name = device.getName();
-                db.rssi = arg1;
-                db.eleType = ele;
-                db.onOff = onfoo;
                 db.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
+                db.setData(data);
                 if (mDeviceListener != null) {
-                    mDeviceListener.onDeviceFound(db);
+                    mDeviceListener.onDeviceFound(db, data);
                 }
                 return;
             }
         }
+
+        //byte[] crcData = new byte[11];
+        //System.arraycopy(data, 0, crcData, 0, 11);
+        //Crc16Util.getData(crcData);
+
         DeviceBean bean = new DeviceBean();
         bean.name = device.getName();
         bean.mac = device.getAddress();
-        bean.rssi = arg1;
-        bean.eleType = ele;
-        bean.onOff = onfoo;
+        bean.setData(data);
         bean.isBonded = device.getBondState() == BluetoothDevice.BOND_BONDED;
         mDeviceList.add(bean);
         if (mDeviceList != null) {
-            mDeviceListener.onDeviceFound(bean);
+            mDeviceListener.onDeviceFound(bean, data);
         }
     }
 
@@ -358,7 +351,7 @@ public class BleManager {
         /**
          * device found
          */
-        void onDeviceFound(DeviceBean db);
+        void onDeviceFound(DeviceBean db, byte[] data);
 
         /**
          * scan finish;

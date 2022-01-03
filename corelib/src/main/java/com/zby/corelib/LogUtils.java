@@ -73,7 +73,7 @@ import java.util.concurrent.TimeUnit;
     private static SimpleDateFormat formatter        = new SimpleDateFormat("yyyy-MM-dd");
     private static SimpleDateFormat timelogFormatter = new SimpleDateFormat("HH:mm:ss");
 
-    private static final String PARENT_DIR = "BleOtaTest";
+    private static final String PARENT_DIR = "BleTest";
     private static final String LOG_DIR = "CmdLog";
 
     private final static String Prefix = "TSocket_";
@@ -97,9 +97,8 @@ import java.util.concurrent.TimeUnit;
             @Override
             public void run() {
                 try {
-                    if(fos != null)
-                    {
-                        Log.e(tag, tag + "写入文件" + msg);
+                    if(fos != null) {
+                        Log.e(tag, msg);
                         File tmpFile = new File(mFileName);
                         if (!tmpFile.exists()) {
                             closeLogFile();
@@ -126,7 +125,7 @@ import java.util.concurrent.TimeUnit;
                         openLogFile();
                         writeLogToFile(tag, msg);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.v(tag, "writeLogToFile err111");
                     e.printStackTrace();
                 }

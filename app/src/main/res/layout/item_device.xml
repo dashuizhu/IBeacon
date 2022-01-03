@@ -26,4 +26,13 @@
         android:textSize="@dimen/textSize_14"
         tools:text="01:02:03:04:05:06" />
 
+
+    <TextView
+        android:id="@+id/tv_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/textSize_14"
+        tools:text="01:02:03:04:05:06" />
+
 </LinearLayout>
