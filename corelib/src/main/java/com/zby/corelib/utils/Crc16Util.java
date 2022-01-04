@@ -39,7 +39,7 @@ public class Crc16Util {
     /**
      * 获取验证码byte数组，基于Modbus CRC16的校验算法
      */
-    private static byte[] getCrc16(byte[] arr_buff) {
+    public static byte[] getCrc16(byte[] arr_buff) {
         int len = arr_buff.length;
 
         // 预置 1 个 16 位的寄存器为十六进制FFFF, 称此寄存器为 CRC寄存器。

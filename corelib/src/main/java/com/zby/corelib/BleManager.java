@@ -143,7 +143,6 @@ public class BleManager {
      * @param isStartScan true startScan, false stop Scan
      */
     public void startScan(boolean isStartScan) {
-        mFilterMacList.clear();
         if (isStartScan) { //开始搜索
             if (scanThread != null) {
                 if (scanThread.isAlive()) {
@@ -207,13 +206,27 @@ public class BleManager {
 
         @Override
         public void onLeScan(BluetoothDevice arg0, int arg1, byte[] arg2) {
-            Log.d(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
+            Log.v(TAG, "found device :" + arg0.getAddress() + "  " + arg0.getName());
             if (mFilterMacList.contains(arg0.getAddress())) {
                 return;
             }
-            mFilterMacList.add(arg0.getAddress());
-            foundDevice(arg0, arg2);
-            //}
+            try {
+                LogUtils.writeLogToFile("foundDevice", "发现设备 " + arg0.getAddress() + "  " + MyHexUtils.buffer2String(arg2));
+                byte[] buff = new byte[12];
+                System.arraycopy(arg2, 0, buff, 0, buff.length);
+                byte[] crcData = Crc16Util.getCrc16(buff);
+                if (crcData[0] == arg2[13] && crcData[1] == arg2[14]) {
+                //if (arg2[13] == 28) {
+                    foundDevice(arg0, arg2);
+                } else {
+                    Log.d(TAG, "过滤 device :" + arg0.getAddress() );
+                    mFilterMacList.add(arg0.getAddress());
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "过滤 device :" + arg0.getAddress() );
+                mFilterMacList.add(arg0.getAddress());
+                e.printStackTrace();
+            }
         }
     };
 
@@ -222,7 +235,6 @@ public class BleManager {
      * @param data
      */
     private void foundDevice(BluetoothDevice device, byte[] data) {
-        LogUtils.writeLogToFile("foundDevice", "发现设备 " + device.getAddress() + "  " + MyHexUtils.buffer2String(data));
         for (DeviceBean db : mDeviceList) {
             if (db.getMac() == device.getAddress()) {
                 db.name = device.getName();

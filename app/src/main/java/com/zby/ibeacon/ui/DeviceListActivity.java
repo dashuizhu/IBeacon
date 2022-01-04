@@ -74,6 +74,7 @@ public class DeviceListActivity extends AppCompatActivity {
         mAdapter = new DeviceAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
+        mRefreshLayout.setEnableRefresh(false);
         mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
@@ -82,16 +83,16 @@ public class DeviceListActivity extends AppCompatActivity {
         });
 
         mAdapter.setData(new ArrayList<DeviceBean>());
-        mAdapter.setOnRVItemClickListener(new BGAOnRVItemClickListener() {
-            @Override
-            public void onRVItemClick(ViewGroup parent, View itemView, int position) {
-
-                Toast.makeText(DeviceListActivity.this, R.string.toast_linking, Toast.LENGTH_LONG)
-                        .show();
-                DeviceBean bd = mAdapter.getData().get(position);
-                BleManager.getInstance().connect(bd);
-            }
-        });
+        //mAdapter.setOnRVItemClickListener(new BGAOnRVItemClickListener() {
+        //    @Override
+        //    public void onRVItemClick(ViewGroup parent, View itemView, int position) {
+        //
+                //Toast.makeText(DeviceListActivity.this, R.string.toast_linking, Toast.LENGTH_LONG)
+                //        .show();
+                //DeviceBean bd = mAdapter.getData().get(position);
+                //BleManager.getInstance().connect(bd);
+        //    }
+        //});
 
         BleManager.getInstance().addOnScanDeviceListener(new BleManager.OnScanDeviceListener() {
             @Override
@@ -120,9 +121,9 @@ public class DeviceListActivity extends AppCompatActivity {
 
             @Override
             public void onLostLink(DeviceBean db) {
-                Toast.makeText(DeviceListActivity.this, R.string.toast_lostLink, Toast.LENGTH_LONG)
-                        .show();
-                AppApplication.sDeviceBean = null;
+                //Toast.makeText(DeviceListActivity.this, R.string.toast_lostLink, Toast.LENGTH_LONG)
+                //        .show();
+                //AppApplication.sDeviceBean = null;
             }
         });
     }
@@ -154,6 +155,10 @@ public class DeviceListActivity extends AppCompatActivity {
                 mBtnBind.setSelected(mIsBind);
                 mBtnBind.setBackgroundColor(mIsBind ? ContextCompat.getColor(DeviceListActivity.this, R.color.color_red)
                         : ContextCompat.getColor(DeviceListActivity.this, R.color.divide_line));
+                if (mIsBind) {
+                    dispoasbeScan();
+                    BleManager.getInstance().startScan(true);
+                }
             }
         });
 
@@ -181,7 +186,8 @@ public class DeviceListActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //6.0系统蓝牙搜索需要 location权限
             Disposable dis = new RxPermissions(this).request(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Consumer<Boolean>() {
                         @Override
@@ -211,10 +217,15 @@ public class DeviceListActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        dispoasbeScan();
+    }
+
+    private void dispoasbeScan() {
         if (mStartScan != null) {
             if (!mStartScan.isDisposed()) {
                 mStartScan.dispose();
             }
         }
     }
+
 }
