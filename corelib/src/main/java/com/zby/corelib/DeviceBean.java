@@ -187,4 +187,18 @@ public class DeviceBean {
         String s2 = MyHexUtils.buffer2String(buff2);
         return  s1 + " crc : " + s2;
     }
+
+    public int getStepNumber() {
+        if (data == null || data.length < 13) {
+            return 0;
+        }
+
+        byte[] buff1 = new byte[4];
+        System.arraycopy(data, 8, buff1, 0, 4);
+        int value = 0;
+        for (int i = 3; i>=0; i--) {
+            value += buff1[i] * Math.pow(256, i);
+        }
+        return value;
+    }
 }

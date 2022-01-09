@@ -215,7 +215,7 @@ public class BleManager {
                 byte[] buff = new byte[12];
                 System.arraycopy(arg2, 0, buff, 0, buff.length);
                 byte[] crcData = Crc16Util.getCrc16(buff);
-                if (crcData[0] == arg2[13] && crcData[1] == arg2[14]) {
+                if (crcData[0] == arg2[12] && crcData[1] == arg2[13]) {
                 //if (arg2[13] == 28) {
                     foundDevice(arg0, arg2);
                 } else {
@@ -396,5 +396,11 @@ public class BleManager {
 
     public void addOnDeviceUpdateListener(OnDeviceUpdateListener listener) {
         this.mDeviceUpdateListener = listener;
+    }
+
+    public void testScan(DeviceBean db, byte[] testData) {
+        if (mDeviceListener != null) {
+            mDeviceListener.onDeviceFound(db, testData);
+        }
     }
 }
