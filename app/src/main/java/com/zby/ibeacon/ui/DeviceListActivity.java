@@ -254,7 +254,7 @@ public class DeviceListActivity extends AppCompatActivity {
     private Disposable mStartScan;
 
     private void startScan() {
-        mStartScan = Observable.interval(1, 12, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
+        mStartScan = Observable.interval(1, 10, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
             @Override
             public void accept(Long aLong) throws Exception {
                 Log.w(TAG, " scan start");
@@ -272,12 +272,12 @@ public class DeviceListActivity extends AppCompatActivity {
             db.setMac("00:00:00:00:00:01");
             db2.setMac("00:00:00:00:00:02");
 
-            byte[] buff = MyHexUtils.hexStringToByte("0D FF DA 13 03 01 01 DA AF 00 00 00");
+            byte[] buff = MyHexUtils.hexStringToByte("0D FF DA 13 03 01 01 DA AF A1 01 00");
 
-            Random random = new Random();
-            buff[8] = (byte) (random.nextInt(100));
-            buff[9] = (byte) random.nextInt(10);
-            buff[10] = (byte) random.nextInt(1);
+            //Random random = new Random();
+            //buff[8] = (byte) 0xA0;
+            //buff[9] = (byte) random.nextInt(1);
+            //buff[10] = (byte) random.nextInt(1);
 
             byte[] data = Crc16Util.getData(buff);
             db.setData(data);

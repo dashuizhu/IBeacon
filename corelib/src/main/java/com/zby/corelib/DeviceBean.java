@@ -197,7 +197,7 @@ public class DeviceBean {
         System.arraycopy(data, 8, buff1, 0, 4);
         int value = 0;
         for (int i = 3; i>=0; i--) {
-            value += buff1[i] * Math.pow(256, i);
+            value += MyByteUtils.byteToInt(buff1[i]) * Math.pow(256, i);
         }
         return value;
     }
