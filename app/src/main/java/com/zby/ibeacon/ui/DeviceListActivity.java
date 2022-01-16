@@ -3,6 +3,7 @@ package com.zby.ibeacon.ui;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -36,6 +37,8 @@ import com.zby.corelib.MyHexUtils;
 import com.zby.corelib.utils.Crc16Util;
 import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
+import com.zby.ibeacon.database.DataBean;
+import com.zby.ibeacon.database.DataDao;
 import com.zby.ibeacon.utils.SharedPreApp;
 import com.zby.ibeacon.utils.ToastUtils;
 import io.reactivex.Observable;
@@ -58,6 +61,8 @@ public class DeviceListActivity extends AppCompatActivity {
     @BindView(R.id.tv_device)     TextView           mTvDevice;
     @BindView(R.id.tv_num)        TextView           mTvNum;
     @BindView(R.id.cl)            ConstraintLayout   mCl;
+    @BindView(R.id.btn_save)      Button             mBtnSave;
+    @BindView(R.id.btn_save_list)      Button             mBtnSaveList;
 
     private DeviceAdapter mAdapter;
 
@@ -67,6 +72,8 @@ public class DeviceListActivity extends AppCompatActivity {
     private String mBindMac;
 
     private MenuItem mMenuItem;
+
+    private DataBean mDataBean;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +111,8 @@ public class DeviceListActivity extends AppCompatActivity {
             public void onRVItemClick(ViewGroup parent, View itemView, int position) {
                 DeviceBean bd = mAdapter.getData().get(position);
                 SharedPreApp.getInstance().setBindMac(bd.getMac());
-                SharedPreApp.getInstance().setKeyNum(db.getStepNumber());
+                //SharedPreApp.getInstance().setKeyNum(db.getStepNumber());
+                DataDao.saveOrUpdate(bd, bd.getStepNumber());
                 initDatas();
             }
         });
@@ -113,9 +121,18 @@ public class DeviceListActivity extends AppCompatActivity {
             @Override
             public synchronized void onDeviceFound(DeviceBean db, byte[] data) {
                 if (TextUtils.equals(db.getMac(), mBindMac)) {
-                    mTvNum.setText(String.format("%05d", db.getStepNumber()));
+                    mDataBean.setNowStep(db.getStepNumber());
+                    mTvNum.setText(String.format("%05d", db.getStepNumber() - mDataBean.getSaveStep()));
                     onNumberChange();
-                    SharedPreApp.getInstance().setKeyNum(db.getStepNumber());
+                    Observable.just(db)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Consumer<DeviceBean>() {
+                                @Override
+                                public void accept(DeviceBean deviceBean) throws Exception {
+                                    DataDao.saveOrUpdate(deviceBean, deviceBean.getStepNumber());
+                                }
+                            });
+                    //SharedPreApp.getInstance().setKeyNum(db.getStepNumber());
                     return;
                 }
 
@@ -148,6 +165,8 @@ public class DeviceListActivity extends AppCompatActivity {
                 //AppApplication.sDeviceBean = null;
             }
         });
+
+        initSaveBtn();
     }
 
     private void initEdit() {
@@ -193,8 +212,10 @@ public class DeviceListActivity extends AppCompatActivity {
             mRefreshLayout.setVisibility(View.VISIBLE);
             mIsBind = true;
             mBindMac = null;
+            mDataBean = null;
         } else {
-            int number = SharedPreApp.getInstance().getKeyNum();
+            mDataBean = DataDao.queryNowData(mac);
+            int number = mDataBean.getNowStep() - mDataBean.getSaveStep();
 
             mRefreshLayout.setVisibility(View.GONE);
             mCl.setVisibility(View.VISIBLE);
@@ -226,6 +247,26 @@ public class DeviceListActivity extends AppCompatActivity {
                         mAdapter.setData(mList);
                     }
                 });
+    }
+
+    private void initSaveBtn() {
+        mBtnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDataBean.setSaveStep(mDataBean.getNowStep());
+                DataDao.saveClean(mBindMac);
+                mTvNum.setText(String.format("%05d", db.getStepNumber() - mDataBean.getSaveStep()));
+                onNumberChange();
+            }
+        });
+
+        mBtnSaveList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(DeviceListActivity.this, DeviceDataListActivity.class));
+            }
+        });
+
     }
 
     @Override
@@ -266,18 +307,19 @@ public class DeviceListActivity extends AppCompatActivity {
 
     DeviceBean db = new DeviceBean();
     DeviceBean db2 = new DeviceBean();
+    int mTestCount = 0;
     private void initDemoData() {
         if (AppConstants.isDemo) {
 
             db.setMac("00:00:00:00:00:01");
             db2.setMac("00:00:00:00:00:02");
 
-            byte[] buff = MyHexUtils.hexStringToByte("0D FF DA 13 03 01 01 DA AF A1 01 00");
+            byte[] buff = MyHexUtils.hexStringToByte("0D FF DA 13 03 01 01 DA 00 00 00 00");
 
-            //Random random = new Random();
-            //buff[8] = (byte) 0xA0;
-            //buff[9] = (byte) random.nextInt(1);
-            //buff[10] = (byte) random.nextInt(1);
+            Random random = new Random();
+            mTestCount += random.nextInt(50);
+            buff[8] = (byte) ( mTestCount%256);
+            buff[9] = (byte) ( mTestCount/256);
 
             byte[] data = Crc16Util.getData(buff);
             db.setData(data);
