@@ -7,7 +7,7 @@ public class AppConstants {
 
     public static int PACKAGE_DATA = 16;
 
-    public static boolean isDemo = true;
+    public static boolean isDemo = false;
 
     public static boolean isEncrypt = true;
 

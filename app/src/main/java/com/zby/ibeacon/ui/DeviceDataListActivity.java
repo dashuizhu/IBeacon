@@ -42,6 +42,7 @@ import com.zby.ibeacon.R;
 import com.zby.ibeacon.adapter.DeviceAdapter;
 import com.zby.ibeacon.database.DataBean;
 import com.zby.ibeacon.database.DataDao;
+import com.zby.ibeacon.utils.ExcelUtil;
 import com.zby.ibeacon.utils.SharedPreApp;
 import com.zby.ibeacon.utils.ToastUtils;
 import io.reactivex.Observable;
@@ -64,6 +65,8 @@ public class DeviceDataListActivity extends AppCompatActivity {
 
     SimpleDateFormat mSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private DataAdapter mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,11 +80,11 @@ public class DeviceDataListActivity extends AppCompatActivity {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        DataAdapter adapter = new DataAdapter(mRecyclerView);
-        mRecyclerView.setAdapter(adapter);
+        mAdapter = new DataAdapter(mRecyclerView);
+        mRecyclerView.setAdapter(mAdapter);
 
         List<DataBean> list = DataDao.queryList();
-        adapter.setData(list);
+        mAdapter.setData(list);
     }
 
     class DataAdapter extends BGARecyclerViewAdapter<DataBean> {
@@ -95,6 +98,7 @@ public class DeviceDataListActivity extends AppCompatActivity {
             helper.setText(R.id.tv_mac, model.getMac());
             helper.setText(R.id.tv_data, String.valueOf(model.getNowStep() - model.getSaveStep()))
                     .setText(R.id.tv_time, mSdf.format(new Date(model.getTime())));
+            helper.setTextColorRes(R.id.tv_data, model.isSave ? R.color.text_normal : R.color.colorPrimary);
         }
     }
 
@@ -106,6 +110,16 @@ public class DeviceDataListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        List<DataBean> list = mAdapter.getData();
+        if (list == null || list.size() ==0) {
+            ToastUtils.toast("数据为空");
+            return false;
+        }
+        String fileName = ExcelUtil.getFileName();
+        String[] titles = new String[] {"mac", "运动步数", "清零记录步数", "总步数", "时间"};
+        ExcelUtil.initExcel(fileName, "运动步数", titles);
+
+        ExcelUtil.writeObjListToExcel(list, fileName, this);
         return super.onOptionsItemSelected(item);
     }
 

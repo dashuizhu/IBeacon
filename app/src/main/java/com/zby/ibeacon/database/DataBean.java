@@ -1,5 +1,9 @@
 package com.zby.ibeacon.database;
 
+import com.zby.ibeacon.utils.ExcelUtil;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -9,10 +13,14 @@ import lombok.Data;
 public class DataBean {
 
   String id;
-  private long    time;
-  private String  mac;
-  private String  name;
-  private boolean isSave;
+  public long    time;
+  public String  mac;
+  public String  name;
+  public boolean isSave;
   int nowStep;
   int saveStep;
+
+  public List<String> getStringList() {
+    return Arrays.asList(new String[] { mac, String.valueOf(nowStep - saveStep), String.valueOf(saveStep), String.valueOf(nowStep), ExcelUtil.mSdf.format(new Date(time))});
+  }
 }

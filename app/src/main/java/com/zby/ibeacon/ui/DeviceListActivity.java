@@ -317,7 +317,11 @@ public class DeviceListActivity extends AppCompatActivity {
             byte[] buff = MyHexUtils.hexStringToByte("0D FF DA 13 03 01 01 DA 00 00 00 00");
 
             Random random = new Random();
-            mTestCount += random.nextInt(50);
+            if (mDataBean == null) {
+                mTestCount = random.nextInt(50);
+            } else {
+                mTestCount = mDataBean.getNowStep() + random.nextInt(50);
+            }
             buff[8] = (byte) ( mTestCount%256);
             buff[9] = (byte) ( mTestCount/256);
 
@@ -325,7 +329,7 @@ public class DeviceListActivity extends AppCompatActivity {
             db.setData(data);
             db2.setData(data);
             Log.w(TAG, "demo--- " + MyHexUtils.buffer2String(data));
-            Observable.just(data).delay(3, TimeUnit.SECONDS)
+            Observable.just(data).delay(5, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Consumer<byte[]>() {
                         @Override

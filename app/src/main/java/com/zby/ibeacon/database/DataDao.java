@@ -31,6 +31,7 @@ public class DataDao extends RealmObject {
 
     public static void saveOrUpdate(final DeviceBean deviceBean, final int nowStep) {
         Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
         DataDao dao = realm.where(DataDao.class)
                 .equalTo(COLUMN_MAC, deviceBean.getMac())
                 .equalTo(COLUMN_IS_SAVE, false)
@@ -59,19 +60,26 @@ public class DataDao extends RealmObject {
             dao.nowStep = nowStep;
         }
         realm.copyToRealmOrUpdate(dao);
-        LogUtils.writeLogToFile(TAG, deviceBean.getMac() + " save step " + dao.saveStep + " - "+ nowStep);
+        realm.commitTransaction();
+        LogUtils.writeLogToFile(TAG,
+                deviceBean.getMac() + " save step " + dao.saveStep + " - " + nowStep);
     }
 
     public static void saveClean(final String mac) {
         Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
         DataDao dao = realm.where(DataDao.class)
                 .equalTo(COLUMN_MAC, mac)
                 .equalTo(COLUMN_IS_SAVE, false)
                 .findFirst();
+
         if (dao != null) {
             dao.isSave = true;
             realm.copyToRealmOrUpdate(dao);
+            realm.commitTransaction();
             LogUtils.writeLogToFile(TAG, mac + " saved! ");
+        } else {
+            realm.commitTransaction();
         }
     }
 
@@ -105,8 +113,9 @@ public class DataDao extends RealmObject {
     public static List<DataBean> queryList(String mac) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        RealmResults<DataDao> results =
-                realm.where(DataDao.class).equalTo(COLUMN_MAC, mac).findAllSorted("time", Sort.DESCENDING);
+        RealmResults<DataDao> results = realm.where(DataDao.class)
+                .equalTo(COLUMN_MAC, mac)
+                .findAllSorted("time", Sort.DESCENDING);
         realm.commitTransaction();
         List<DataBean> list = new ArrayList<>();
         if (results == null || !results.isValid()) {
@@ -124,8 +133,10 @@ public class DataDao extends RealmObject {
      */
     public static List<DataBean> queryList() {
         Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
         RealmResults<DataDao> results =
-                realm.where(DataDao.class).findAllSorted("time",Sort.DESCENDING);
+                realm.where(DataDao.class).findAllSorted("time", Sort.DESCENDING);
+        realm.commitTransaction();
         List<DataBean> list = new ArrayList<>();
         if (results == null || !results.isValid()) {
             return list;
@@ -138,16 +149,17 @@ public class DataDao extends RealmObject {
     }
 
     public static DataBean queryNowData(String mac) {
-      Realm realm = Realm.getDefaultInstance();
-      realm.beginTransaction();
-      DataDao dao = realm.where(DataDao.class)
-              .equalTo(COLUMN_MAC, mac)
-              .equalTo(COLUMN_IS_SAVE, false)
-              .findFirst();
-      if (dao == null) {
-         DataBean dataBean = new DataBean();
-         return dataBean;
-      }
-      return dao.castBean();
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        DataDao dao = realm.where(DataDao.class)
+                .equalTo(COLUMN_MAC, mac)
+                .equalTo(COLUMN_IS_SAVE, false)
+                .findFirst();
+        realm.commitTransaction();
+        if (dao == null) {
+            DataBean dataBean = new DataBean();
+            return dataBean;
+        }
+        return dao.castBean();
     }
 }
